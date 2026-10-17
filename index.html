@@ -27,12 +27,7 @@
   <header class="sticky top-0 z-20 border-b border-slate-200/80 bg-white/95 backdrop-blur">
     <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
       <a href="#" class="flex min-w-0 items-center gap-3" aria-label="De Gympies startpagina">
-        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-teal-700 text-white shadow-sm" aria-hidden="true">
-          <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 17.5 8 13l3 2.5 5-7 4 3M5 6.5h.01M18.5 18.5h.01"/>
-            <circle cx="5" cy="6.5" r="1.5"/><circle cx="18.5" cy="18.5" r="1.5"/>
-          </svg>
-        </span>
+        <img id="clubLogo" src="Gympies%20logo.jpg" alt="De Gympies Keerbergen" class="h-11 w-11 rounded-xl border border-slate-200 bg-white object-contain p-0.5">
         <span class="min-w-0">
           <span class="block truncate text-sm font-bold tracking-tight text-slate-900 sm:text-base">De Gympies</span>
           <span class="block text-xs text-slate-500">Urenregistratie</span>
@@ -176,12 +171,17 @@
             <p class="text-[11px] font-medium uppercase tracking-wide text-slate-400">Totaal</p>
             <p id="boardCount" class="mt-0.5 text-lg font-bold text-slate-900">0</p>
           </div>
-          <div class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+          <button id="pendingCountButton" type="button" class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-left shadow-sm transition hover:border-amber-400 hover:bg-amber-100 focus-visible:outline-amber-600">
             <p class="text-[11px] font-medium uppercase tracking-wide text-slate-400">Te beoordelen</p>
             <p id="pendingCount" class="mt-0.5 text-lg font-bold text-amber-700">0</p>
-          </div>
+          </button>
         </div>
       </div>
+      <div class="mb-5 flex gap-1 rounded-xl bg-slate-100 p-1" role="tablist" aria-label="Bestuursoverzichten">
+        <button id="approvalTab" type="button" role="tab" aria-selected="true" aria-controls="boardApprovalPanel" class="flex-1 rounded-lg bg-white px-3 py-2.5 text-sm font-semibold text-teal-800 shadow-sm">Goedkeuringen</button>
+        <button id="dashboardTab" type="button" role="tab" aria-selected="false" aria-controls="boardDashboardPanel" class="flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-500 hover:text-slate-800">Traineroverzicht</button>
+      </div>
+      <div id="boardApprovalPanel" role="tabpanel" aria-labelledby="approvalTab">
       <section class="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-labelledby="additionalTrainersHeading">
         <div class="mb-4">
           <h2 id="additionalTrainersHeading" class="font-bold text-slate-900">Extra officiële lesgevers</h2>
@@ -202,6 +202,42 @@
         <p class="text-sm font-semibold text-slate-700">Geen ingediende onkosten in deze periode</p>
         <p class="mt-1 text-sm text-slate-500">Ingediende trainers verschijnen hier voor goedkeuring.</p>
       </div>
+      </div>
+      <section id="boardDashboardPanel" class="hidden" role="tabpanel" aria-labelledby="dashboardTab">
+        <div class="mb-5 flex flex-wrap items-end justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div>
+            <h2 class="font-bold text-slate-900">Registraties en kostennota-status</h2>
+            <p class="mt-1 text-xs text-slate-500">Maandbedragen zijn gebaseerd op alle bijgewoonde uren; de notastatus geldt voor de volledige tweemaandsperiode van de gekozen maand.</p>
+          </div>
+          <div class="grid w-full grid-cols-2 gap-2 sm:w-auto sm:grid-cols-4">
+            <label class="text-xs font-semibold text-slate-500">Maand<select id="dashboardMonth" aria-label="Filter op maand" class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800"></select></label>
+            <label class="text-xs font-semibold text-slate-500">Status<select id="dashboardStatus" aria-label="Filter op status" class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800"><option value="all">Alle statussen</option><option value="attention">Nog niet in orde</option><option value="Ingediend">Ingediend</option><option value="Goedgekeurd">Goedgekeurd</option></select></label>
+            <label class="text-xs font-semibold text-slate-500">Trainer<select id="dashboardTrainer" aria-label="Filter op trainer" class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800"></select></label>
+            <label class="text-xs font-semibold text-slate-500">Zoeken<input id="dashboardSearch" type="search" placeholder="Naam trainer" class="mt-1 w-full rounded-lg border border-slate-300 px-2.5 py-2 text-sm text-slate-800"></label>
+          </div>
+        </div>
+        <div class="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Totaal maandbedrag</p><p id="dashboardTotalAmount" class="mt-2 text-2xl font-bold tracking-tight text-slate-900">€ 0,00</p><p id="dashboardMonthLabel" class="mt-1 text-xs text-slate-500"></p></article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Trainers in overzicht</p><p id="dashboardTrainerCount" class="mt-2 text-2xl font-bold tracking-tight text-slate-900">0</p><p class="mt-1 text-xs text-slate-500">inclusief actieve extra lesgevers</p></article>
+          <article class="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm"><p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Nog niet in orde</p><p id="dashboardAttentionCount" class="mt-2 text-2xl font-bold tracking-tight text-amber-950">0</p><p class="mt-1 text-xs text-amber-800">ontbrekend, concept of onvolledig</p></article>
+          <article class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm"><p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Goedgekeurd</p><p id="dashboardApprovedCount" class="mt-2 text-2xl font-bold tracking-tight text-emerald-950">0</p><p class="mt-1 text-xs text-emerald-800">kostennota's in de periode</p></article>
+        </div>
+        <section class="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-labelledby="monthlyChartHeading">
+          <div class="mb-4">
+            <h2 id="monthlyChartHeading" class="font-bold text-slate-900">Maandbedragen</h2>
+            <p class="mt-1 text-xs text-slate-500">Totaal van geregistreerde vergoedingen per maand, voor de huidige trainerfilter.</p>
+          </div>
+          <div id="monthlyChart" class="flex h-48 items-end gap-2 border-b border-slate-200 px-1 sm:gap-4" role="img" aria-label="Grafiek maandbedragen"></div>
+          <p id="chartDescription" class="sr-only"></p>
+        </section>
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" aria-labelledby="trainerStatusHeading">
+          <div class="border-b border-slate-100 px-4 py-4 sm:px-5">
+            <h2 id="trainerStatusHeading" class="font-bold text-slate-900">Status per trainer</h2>
+          </div>
+          <div id="dashboardTrainerList" class="divide-y divide-slate-100" aria-live="polite"></div>
+          <div id="emptyDashboard" class="hidden px-5 py-9 text-center text-sm text-slate-500">Geen trainers gevonden voor deze filters.</div>
+        </section>
+      </section>
     </section>
   </main>
 
@@ -255,6 +291,11 @@
           <div><label for="profilePhone" class="mb-1.5 block text-sm font-semibold text-slate-700">Telefoon</label><input id="profilePhone" name="phone" type="tel" maxlength="30" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
         </div>
         <div><label for="profileAddress" class="mb-1.5 block text-sm font-semibold text-slate-700">Adres</label><input id="profileAddress" name="address" maxlength="140" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div><label for="profileNationalNumber" class="mb-1.5 block text-sm font-semibold text-slate-700">Rijksregisternummer</label><input id="profileNationalNumber" name="nationalNumber" inputmode="numeric" autocomplete="off" placeholder="00.00.00-000.00 (fictief)" maxlength="20" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+          <div><label for="profileBankAccount" class="mb-1.5 block text-sm font-semibold text-slate-700">Rekeningnummer (IBAN)</label><input id="profileBankAccount" name="bankAccount" autocomplete="off" placeholder="BE00 0000 0000 0000 (fictief)" maxlength="34" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+        </div>
+        <p class="-mt-2 text-xs text-amber-700">Voorbeeldgegevens zijn fictief. Echte rijksregisternummers en rekeningnummers horen pas in een beveiligde koppeling.</p>
         <fieldset class="rounded-xl border border-slate-200 p-4">
           <legend class="px-1 text-sm font-bold text-slate-800">Uurtarieven</legend>
           <div class="grid grid-cols-2 gap-3">
@@ -294,6 +335,14 @@
       <div id="submitConflictWarning" class="mb-4 hidden rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900" role="alert"></div>
       <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-950">
         Controleer voor je indient of alle trainingen, aanwezigheden, vervangingen en uren kloppen. Afgevinkte afwezigheden worden niet op de onkostenstaat gezet.
+      </div>
+      <div class="mt-4">
+        <div class="mb-2 flex items-center justify-between gap-2">
+          <label for="signatureCanvas" class="text-sm font-semibold text-slate-700">Handtekening van trainer</label>
+          <button id="clearSignature" type="button" class="text-xs font-semibold text-teal-800 hover:underline">Wissen</button>
+        </div>
+        <canvas id="signatureCanvas" width="720" height="180" class="h-32 w-full touch-none rounded-xl border border-slate-300 bg-white"></canvas>
+        <p class="mt-1.5 text-xs text-slate-500">Zet je handtekening met je vinger op het scherm of met de muis.</p>
       </div>
       <label class="mt-4 flex items-start gap-2.5 text-sm leading-5 text-slate-700">
         <input id="confirmReviewed" type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600">
@@ -350,11 +399,11 @@
 
     let currentUser = "Noor Vandenberg";
     let trainerProfiles = {
-      "Noor Vandenberg": { email: "noor.vandenberg@example.com", phone: "000 00 00 00", address: "Demo straat 1, 0000 Demo", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 1, group: "K12za11u10", weekday: 6, hours: 1, role: "REC HOOFD" }], additionalProfiles: [{ name: "Emma De Smet", enabled: true }, { name: "Bram Jacobs", enabled: false }] },
-      "Lotte Peeters": { email: "lotte.peeters@example.com", phone: "", address: "", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
-      "Milan Vermeulen": { email: "milan.vermeulen@example.com", phone: "", address: "", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
-      "Emma De Smet": { email: "emma.desmet@example.com", phone: "", address: "", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 101, group: "G-gym jeugd", weekday: 6, hours: 1, role: "REC HULP" }], owner: "Noor Vandenberg", isAdditional: true, enabled: true },
-      "Bram Jacobs": { email: "bram.jacobs@example.com", phone: "", address: "", rateHelp: 8, rateHead: 14, fixedGroups: [], owner: "Noor Vandenberg", isAdditional: true, enabled: false }
+      "Noor Vandenberg": { email: "noor.vandenberg@example.com", phone: "000 00 00 00", address: "Demo straat 1, 0000 Demo", nationalNumber: "00.00.00-000.00", bankAccount: "BE00 0000 0000 0000", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 1, group: "K12za11u10", weekday: 6, hours: 1, role: "REC HOOFD" }], additionalProfiles: [{ name: "Emma De Smet", enabled: true }, { name: "Bram Jacobs", enabled: false }] },
+      "Lotte Peeters": { email: "lotte.peeters@example.com", phone: "", address: "Voorbeeldlaan 12, 0000 Testdorp", nationalNumber: "00.00.00-000.01", bankAccount: "BE00 0000 0000 0001", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
+      "Milan Vermeulen": { email: "milan.vermeulen@example.com", phone: "", address: "Fictiestraat 3, 0000 Voorbeeld", nationalNumber: "00.00.00-000.02", bankAccount: "BE00 0000 0000 0002", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
+      "Emma De Smet": { email: "emma.desmet@example.com", phone: "", address: "Demoweg 8, 0000 Testdorp", nationalNumber: "00.00.00-000.03", bankAccount: "BE00 0000 0000 0003", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 101, group: "G-gym jeugd", weekday: 6, hours: 1, role: "REC HULP" }], owner: "Noor Vandenberg", isAdditional: true, enabled: true },
+      "Bram Jacobs": { email: "bram.jacobs@example.com", phone: "", address: "Fictielaan 5, 0000 Voorbeeld", nationalNumber: "00.00.00-000.04", bankAccount: "BE00 0000 0000 0004", rateHelp: 8, rateHead: 14, fixedGroups: [], owner: "Noor Vandenberg", isAdditional: true, enabled: false }
     };
     const todayString = isoDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
     let entries = [
@@ -380,6 +429,51 @@
     const editDialog = document.getElementById("editDialog");
     const profileDialog = document.getElementById("profileDialog");
     const submitDialog = document.getElementById("submitDialog");
+    const signatureCanvas = document.getElementById("signatureCanvas");
+    const signatureContext = signatureCanvas.getContext("2d");
+    let signatureHasInk = false;
+    let signatureDrawing = false;
+    signatureContext.strokeStyle = "#0f172a";
+    signatureContext.lineWidth = 3;
+    signatureContext.lineCap = "round";
+    signatureContext.lineJoin = "round";
+    function updateSubmitButton() {
+      document.getElementById("confirmSubmit").disabled =
+        !document.getElementById("confirmReviewed").checked || !signatureHasInk;
+    }
+    function clearSignature() {
+      signatureContext.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+      signatureHasInk = false;
+      updateSubmitButton();
+    }
+    function signaturePoint(event) {
+      const bounds = signatureCanvas.getBoundingClientRect();
+      return {
+        x: (event.clientX - bounds.left) * signatureCanvas.width / bounds.width,
+        y: (event.clientY - bounds.top) * signatureCanvas.height / bounds.height
+      };
+    }
+    signatureCanvas.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      signatureCanvas.setPointerCapture(event.pointerId);
+      const point = signaturePoint(event);
+      signatureDrawing = true;
+      signatureHasInk = true;
+      signatureContext.beginPath();
+      signatureContext.moveTo(point.x, point.y);
+      signatureContext.lineTo(point.x + 0.1, point.y + 0.1);
+      signatureContext.stroke();
+      updateSubmitButton();
+    });
+    signatureCanvas.addEventListener("pointermove", (event) => {
+      if (!signatureDrawing) return;
+      const point = signaturePoint(event);
+      signatureContext.lineTo(point.x, point.y);
+      signatureContext.stroke();
+    });
+    signatureCanvas.addEventListener("pointerup", () => { signatureDrawing = false; });
+    signatureCanvas.addEventListener("pointercancel", () => { signatureDrawing = false; });
+    document.getElementById("clearSignature").addEventListener("click", clearSignature);
     const monthNames = new Intl.DateTimeFormat("nl-BE", { month: "long" });
     const currency = new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR" });
     const allMonths = new Intl.DateTimeFormat("nl-BE", { month: "long", year: "numeric" });
@@ -415,6 +509,9 @@
     const boardPeriodSelect = document.getElementById("boardPeriod");
     const weekdays = ["Zondag", "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag"];
     let fixedScheduleTarget = currentUser;
+    let profileEditingTrainer = currentUser;
+    let profileOpenedFromBoard = false;
+    const periodSubmissions = {};
     function updateReplacementOptions() {
       [document.getElementById("replacementFor"), document.getElementById("editReplacementFor")].forEach((select) => {
         const previous = select.value;
@@ -621,6 +718,155 @@
         .sort((a, b) => a.trainer.localeCompare(b.trainer));
     }
 
+    function registeredTrainers() {
+      return Object.entries(trainerProfiles)
+        .filter(([, profile]) => !profile.isAdditional || profile.enabled)
+        .map(([name]) => name)
+        .sort((a, b) => a.localeCompare(b));
+    }
+
+    function dashboardMonthLabel(monthKey) {
+      const [year, month] = monthKey.split("-").map(Number);
+      return allMonths.format(new Date(year, month - 1, 1));
+    }
+
+    function dashboardEntriesForMonth(trainer, monthKey) {
+      return entries.filter((entry) => entry.trainer === trainer
+        && entry.date.startsWith(monthKey)
+        && entry.attended !== false);
+    }
+
+    function trainerPeriodStatus(trainer, monthKey) {
+      const periodKey = periodForDate(`${monthKey}-01`).key;
+      const periodEntries = getPeriodEntries(periodKey, trainer);
+      const activeEntries = periodEntries.filter((entry) => entry.attended !== false);
+      if (activeEntries.length === 0) return { label: "Nog niet ingediend", key: "attention" };
+      if (activeEntries.some((entry) => entry.status === "Concept")) {
+        return {
+          label: activeEntries.some((entry) => entry.status !== "Concept") ? "Deels ingediend" : "Concept",
+          key: "attention"
+        };
+      }
+      if (activeEntries.every((entry) => entry.status === "Goedgekeurd")) return { label: "Goedgekeurd", key: "Goedgekeurd" };
+      return { label: "Ingediend", key: "Ingediend" };
+    }
+
+    function populateDashboardFilters() {
+      const monthSelect = document.getElementById("dashboardMonth");
+      const trainerSelect = document.getElementById("dashboardTrainer");
+      const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+      const selectedMonth = monthSelect.value || currentMonthKey;
+      const selectedTrainer = trainerSelect.value || "all";
+      const monthKeys = new Set();
+      for (let offset = 0; offset < 12; offset += 1) {
+        const date = new Date(today.getFullYear(), today.getMonth() - offset, 1);
+        monthKeys.add(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`);
+      }
+      entries.forEach((entry) => monthKeys.add(entry.date.slice(0, 7)));
+      monthSelect.innerHTML = [...monthKeys].sort().reverse()
+        .map((key) => `<option value="${key}">${escapeHtml(dashboardMonthLabel(key))}</option>`).join("");
+      monthSelect.value = monthKeys.has(selectedMonth) ? selectedMonth : currentMonthKey;
+      const options = registeredTrainers();
+      trainerSelect.innerHTML = `<option value="all">Alle trainers</option>${options.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("")}`;
+      trainerSelect.value = options.includes(selectedTrainer) ? selectedTrainer : "all";
+    }
+
+    function renderMonthlyChart(selectedMonth, trainerFilter) {
+      const chart = document.getElementById("monthlyChart");
+      const [year, month] = selectedMonth.split("-").map(Number);
+      const months = Array.from({ length: 6 }, (_, index) => {
+        const date = new Date(year, month - 6 + index, 1);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        return { date, key };
+      });
+      const trainers = trainerFilter === "all" ? registeredTrainers() : [trainerFilter];
+      trainers.forEach((trainer) => months.forEach(({ date }) => ensureRecurringEntries(trainer, periodForDate(isoDate(date.getFullYear(), date.getMonth() + 1, 1)).key)));
+      const amounts = months.map(({ key }) => sumAmount(entries.filter((entry) =>
+        entry.date.startsWith(key)
+        && entry.attended !== false
+        && trainers.includes(entry.trainer))));
+      const max = Math.max(1, ...amounts);
+      chart.innerHTML = months.map(({ date, key }, index) => {
+        const amount = amounts[index];
+        const height = amount === 0 ? 2 : Math.max(8, (amount / max) * 145);
+        const isSelected = key === selectedMonth;
+        return `<div class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2" title="${escapeHtml(allMonths.format(date))}: ${escapeHtml(currency.format(amount))}">
+          <span class="truncate text-[10px] font-semibold text-slate-600 sm:text-xs">${escapeHtml(currency.format(amount))}</span>
+          <div class="w-full max-w-12 rounded-t-lg ${isSelected ? "bg-teal-700" : "bg-teal-200"}" style="height:${height}px" aria-hidden="true"></div>
+          <span class="text-[10px] capitalize text-slate-500 sm:text-xs">${escapeHtml(monthNames.format(date))}</span>
+        </div>`;
+      }).join("");
+      document.getElementById("chartDescription").textContent = months
+        .map(({ date }, index) => `${allMonths.format(date)}: ${currency.format(amounts[index])}`).join(". ");
+    }
+
+    function renderDashboard() {
+      populateDashboardFilters();
+      const monthSelect = document.getElementById("dashboardMonth");
+      const trainerSelect = document.getElementById("dashboardTrainer");
+      const month = monthSelect.value;
+      const statusFilter = document.getElementById("dashboardStatus").value;
+      const trainerFilter = trainerSelect.value;
+      const query = document.getElementById("dashboardSearch").value.trim().toLocaleLowerCase("nl-BE");
+      const trainers = registeredTrainers().map((trainer) => {
+        ensureRecurringEntries(trainer, periodForDate(`${month}-01`).key);
+        const monthly = dashboardEntriesForMonth(trainer, month);
+        return {
+          trainer,
+          monthly,
+          amount: sumAmount(monthly),
+          hours: sumHours(monthly),
+          status: trainerPeriodStatus(trainer, month)
+        };
+      });
+      const filtered = trainers.filter((item) =>
+        (trainerFilter === "all" || item.trainer === trainerFilter)
+        && (!query || item.trainer.toLocaleLowerCase("nl-BE").includes(query))
+        && (statusFilter === "all" || (statusFilter === "attention" ? item.status.key === "attention" : item.status.key === statusFilter)));
+      const totalAmount = filtered.reduce((total, item) => total + item.amount, 0);
+      document.getElementById("dashboardTotalAmount").textContent = currency.format(totalAmount);
+      document.getElementById("dashboardMonthLabel").textContent = dashboardMonthLabel(month);
+      document.getElementById("dashboardTrainerCount").textContent = String(filtered.length);
+      document.getElementById("dashboardAttentionCount").textContent = String(filtered.filter((item) => item.status.key === "attention").length);
+      document.getElementById("dashboardApprovedCount").textContent = String(filtered.filter((item) => item.status.key === "Goedgekeurd").length);
+      document.getElementById("pendingCount").textContent = String(trainers.filter((item) => item.status.key === "attention").length);
+      document.getElementById("dashboardTrainerList").innerHTML = filtered.map((item) => {
+        const statusStyle = item.status.key === "Goedgekeurd"
+          ? "bg-emerald-50 text-emerald-700"
+          : item.status.key === "Ingediend"
+            ? "bg-blue-50 text-blue-700"
+            : "bg-amber-50 text-amber-800";
+        const period = periodForDate(`${month}-01`);
+        return `<article class="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div class="flex min-w-0 items-center gap-3">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-amber-100 text-xs font-bold text-amber-900">${escapeHtml(initials(item.trainer))}</span>
+            <div class="min-w-0"><h3 class="truncate text-sm font-bold text-slate-900">${escapeHtml(item.trainer)}</h3><p class="mt-0.5 text-xs text-slate-500">${item.monthly.length} trainingen · ${String(item.hours).replace(".", ",")} uur in ${escapeHtml(dashboardMonthLabel(month))}</p></div>
+          </div>
+          <div class="flex items-center justify-between gap-4 sm:justify-end">
+            <div class="text-right"><p class="text-sm font-bold text-slate-900">${escapeHtml(currency.format(item.amount))}</p><p class="mt-0.5 text-[11px] text-slate-500">maandbedrag</p></div>
+            <span class="min-w-28 rounded-full px-2.5 py-1 text-center text-[11px] font-semibold ${statusStyle}">${escapeHtml(item.status.label)}</span>
+            <button type="button" data-edit-profile="${escapeHtml(item.trainer)}" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Fiche</button>
+            <button type="button" data-open-period="${period.key}" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">Details</button>
+          </div>
+        </article>`;
+      }).join("");
+      document.getElementById("emptyDashboard").classList.toggle("hidden", filtered.length > 0);
+      renderMonthlyChart(month, trainerFilter);
+    }
+
+    function setBoardTab(tab) {
+      const showDashboard = tab === "dashboard";
+      document.getElementById("boardApprovalPanel").classList.toggle("hidden", showDashboard);
+      document.getElementById("boardDashboardPanel").classList.toggle("hidden", !showDashboard);
+      const approvalTab = document.getElementById("approvalTab");
+      const dashboardTab = document.getElementById("dashboardTab");
+      approvalTab.setAttribute("aria-selected", String(!showDashboard));
+      dashboardTab.setAttribute("aria-selected", String(showDashboard));
+      approvalTab.className = `flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold ${!showDashboard ? "bg-white text-teal-800 shadow-sm" : "text-slate-500 hover:text-slate-800"}`;
+      dashboardTab.className = `flex-1 rounded-lg px-3 py-2.5 text-sm font-semibold ${showDashboard ? "bg-white text-teal-800 shadow-sm" : "text-slate-500 hover:text-slate-800"}`;
+      if (showDashboard) renderDashboard();
+    }
+
     function renderBoard() {
       const periodKey = boardPeriodSelect.value;
       const period = periodForDate(`${periodKey}-01`);
@@ -654,10 +900,11 @@
               <summary class="cursor-pointer list-none text-xs font-semibold text-teal-800">Bekijk ${items.length === 1 ? "training" : "trainingen"} <span aria-hidden="true">⌄</span></summary>
               <div class="mt-3 space-y-2">${detailRows}</div>
             </details>
-            <div class="mt-4 border-t border-slate-100 pt-3">
+            <div class="mt-4 flex gap-2 border-t border-slate-100 pt-3">
+              <button type="button" data-action="profile" data-trainer="${escapeHtml(trainer)}" class="flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50">Trainerfiche</button>
               ${approved
-                ? `<button type="button" data-action="download" data-trainer="${escapeHtml(trainer)}" data-period="${periodKey}" class="w-full rounded-xl border border-teal-200 px-3 py-2.5 text-xs font-bold text-teal-800 hover:bg-teal-50">Download PDF voor boekhouding</button>`
-                : `<button type="button" data-action="approve" data-trainer="${escapeHtml(trainer)}" data-period="${periodKey}" class="w-full rounded-xl bg-teal-700 px-3 py-2.5 text-xs font-bold text-white transition hover:bg-teal-800">Keur periode goed &amp; maak PDF</button>`}
+                ? `<button type="button" data-action="download" data-trainer="${escapeHtml(trainer)}" data-period="${periodKey}" class="flex-1 rounded-xl border border-teal-200 px-3 py-2.5 text-xs font-bold text-teal-800 hover:bg-teal-50">Download PDF voor boekhouding</button>`
+                : `<button type="button" data-action="approve" data-trainer="${escapeHtml(trainer)}" data-period="${periodKey}" class="flex-1 rounded-xl bg-teal-700 px-3 py-2.5 text-xs font-bold text-white transition hover:bg-teal-800">Keur periode goed &amp; maak PDF</button>`}
             </div>
           </div>
         </article>`;
@@ -767,6 +1014,7 @@
       renderTrainerPeople();
       renderTrainer();
       renderBoard();
+      renderDashboard();
     }
 
     function showToast(message) {
@@ -788,18 +1036,25 @@
       if (isBoard) renderBoard();
     }
 
-    function openProfile() {
-      const profile = trainerProfiles[currentUser];
-      document.getElementById("profileName").value = currentUser;
+    function openProfile(trainerName = currentUser, fromBoard = false) {
+      const profile = trainerProfiles[trainerName];
+      if (!profile) return;
+      profileEditingTrainer = trainerName;
+      profileOpenedFromBoard = fromBoard;
+      document.querySelector("#profileDialog h2").textContent = fromBoard ? "Trainerfiche beheren" : "Persoonlijke gegevens & tarieven";
+      document.querySelector("#profileDialog form > div:last-child button[type=submit]").textContent = fromBoard ? "Fiche opslaan" : "Profiel opslaan";
+      document.getElementById("profileName").value = trainerName;
       document.getElementById("profileEmail").value = profile.email || "";
       document.getElementById("profilePhone").value = profile.phone || "";
       document.getElementById("profileAddress").value = profile.address || "";
+      document.getElementById("profileNationalNumber").value = profile.nationalNumber || "";
+      document.getElementById("profileBankAccount").value = profile.bankAccount || "";
       document.getElementById("rateHelp").value = profile.rateHelp;
       document.getElementById("rateHead").value = profile.rateHead;
       const targetSelect = document.getElementById("fixedProfileTarget");
-      const fixedPeople = [currentUser, ...additionalProfiles()];
+      const fixedPeople = [trainerName, ...additionalProfiles(trainerName)];
       targetSelect.innerHTML = fixedPeople.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
-      fixedScheduleTarget = fixedPeople.includes(fixedScheduleTarget) ? fixedScheduleTarget : currentUser;
+      fixedScheduleTarget = trainerName;
       targetSelect.value = fixedScheduleTarget;
       renderFixedGroups(trainerProfiles[fixedScheduleTarget]?.fixedGroups || []);
       profileDialog.showModal();
@@ -845,7 +1100,10 @@
       const period = periodForDate(`${periodKey}-01`);
       const profile = trainerProfiles[trainer] || {};
       const pdf = new JsPDF();
-      let y = 20;
+      const logo = document.getElementById("clubLogo");
+      if (!logo.complete || logo.naturalWidth === 0) throw new Error("Het Gympies-logo kon niet worden geladen en is daarom niet in de PDF opgenomen.");
+      pdf.addImage(logo, "JPEG", 18, 10, 24, 18);
+      let y = 38;
       const line = (text, size = 11, bold = false) => {
         pdf.setFont("helvetica", bold ? "bold" : "normal");
         pdf.setFontSize(size);
@@ -857,6 +1115,8 @@
       line(`Trainer: ${trainer}`, 11);
       if (profile.email) line(`E-mail: ${profile.email}`);
       if (profile.address) line(`Adres: ${profile.address}`);
+      if (profile.nationalNumber) line(`Rijksregisternummer: ${profile.nationalNumber}`);
+      if (profile.bankAccount) line(`Rekeningnummer (IBAN): ${profile.bankAccount}`);
       y += 4;
       line("Berekening per maand", 12, true);
       const months = periodMonths(period);
@@ -895,6 +1155,15 @@
       pdf.text(`Totaal ${sumHours(items)} uur`, 18, y);
       pdf.text(currency.format(sumAmount(items)), 165, y);
       y += 10;
+      const signature = periodSubmissions[`${trainer}|${periodKey}`]?.signature;
+      if (signature) {
+        if (y > 245) { pdf.addPage(); y = 20; }
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(10);
+        pdf.text("Handtekening trainer", 18, y);
+        pdf.addImage(signature, "PNG", 18, y + 3, 56, 18);
+        y += 27;
+      }
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(9);
       pdf.text(`Goedgekeurd op ${displayDate(todayString)} - De Gympies`, 18, y);
@@ -904,8 +1173,34 @@
 
     trainerTab.addEventListener("click", () => setView("trainer"));
     boardTab.addEventListener("click", () => setView("board"));
+    document.getElementById("approvalTab").addEventListener("click", () => setBoardTab("approval"));
+    document.getElementById("dashboardTab").addEventListener("click", () => setBoardTab("dashboard"));
     trainerPeriodSelect.addEventListener("change", renderTrainer);
     boardPeriodSelect.addEventListener("change", renderBoard);
+    ["dashboardMonth", "dashboardStatus", "dashboardTrainer"].forEach((id) => {
+      document.getElementById(id).addEventListener("change", renderDashboard);
+    });
+    document.getElementById("dashboardSearch").addEventListener("input", renderDashboard);
+    document.getElementById("dashboardTrainerList").addEventListener("click", (event) => {
+      const profileButton = event.target.closest("button[data-edit-profile]");
+      if (profileButton) {
+        openProfile(profileButton.dataset.editProfile, true);
+        return;
+      }
+      const button = event.target.closest("button[data-open-period]");
+      if (button) {
+        boardPeriodSelect.value = button.dataset.openPeriod;
+        renderBoard();
+        setBoardTab("approval");
+      }
+    });
+    document.getElementById("pendingCountButton").addEventListener("click", () => {
+      setView("board");
+      setBoardTab("dashboard");
+      document.getElementById("dashboardStatus").value = "attention";
+      renderDashboard();
+      document.getElementById("dashboardTrainerList").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
     document.getElementById("profileButton").addEventListener("click", openProfile);
     document.getElementById("mobileProfileButton").addEventListener("click", openProfile);
     document.getElementById("trainerPerson").addEventListener("change", (event) => {
@@ -951,7 +1246,7 @@
     document.getElementById("profileForm").addEventListener("submit", (event) => {
       event.preventDefault();
       const formData = new FormData(event.currentTarget);
-      const oldName = currentUser;
+      const oldName = profileEditingTrainer;
       const newName = String(formData.get("name")).trim();
       if (newName !== oldName && trainerProfiles[newName]) {
         showToast("Er bestaat al een profiel met deze naam.");
@@ -961,15 +1256,20 @@
       const primaryFixedGroups = fixedScheduleTarget === oldName
         ? fixedGroups
         : trainerProfiles[oldName].fixedGroups || [];
-      trainerProfiles[newName] = {
+      const existingProfile = trainerProfiles[oldName];
+      const updatedProfile = {
+        ...existingProfile,
         email: String(formData.get("email")).trim(),
         phone: String(formData.get("phone")).trim(),
         address: String(formData.get("address")).trim(),
+        nationalNumber: String(formData.get("nationalNumber")).trim(),
+        bankAccount: String(formData.get("bankAccount")).trim(),
         rateHelp: Number(formData.get("rateHelp")),
         rateHead: Number(formData.get("rateHead")),
         fixedGroups: primaryFixedGroups,
-        additionalProfiles: trainerProfiles[newName]?.additionalProfiles || trainerProfiles[oldName].additionalProfiles || []
+        additionalProfiles: existingProfile.additionalProfiles || []
       };
+      trainerProfiles[newName] = updatedProfile;
       if (fixedScheduleTarget !== oldName && trainerProfiles[fixedScheduleTarget]) {
         trainerProfiles[fixedScheduleTarget].fixedGroups = fixedGroups;
       }
@@ -977,12 +1277,23 @@
         delete trainerProfiles[oldName];
         entries.filter((entry) => entry.trainer === oldName).forEach((entry) => { entry.trainer = newName; });
         entries.filter((entry) => entry.replacementFor === oldName).forEach((entry) => { entry.replacementFor = newName; });
+        Object.keys(periodSubmissions).filter((key) => key.startsWith(`${oldName}|`)).forEach((key) => {
+          periodSubmissions[key.replace(`${oldName}|`, `${newName}|`)] = periodSubmissions[key];
+          delete periodSubmissions[key];
+        });
+        Object.values(trainerProfiles).forEach((profile) => {
+          if (profile.owner === oldName) profile.owner = newName;
+          profile.additionalProfiles?.forEach((slot) => {
+            if (slot.name === oldName) slot.name = newName;
+          });
+        });
         (trainerProfiles[newName].additionalProfiles || []).forEach((slot) => {
           if (trainerProfiles[slot.name]) trainerProfiles[slot.name].owner = newName;
         });
         if (fixedScheduleTarget === oldName) fixedScheduleTarget = newName;
-        currentUser = newName;
+        if (currentUser === oldName) currentUser = newName;
       }
+      profileEditingTrainer = newName;
       [newName, ...additionalProfiles(newName)].forEach((trainer) => {
         const activeScheduleIds = new Set((trainerProfiles[trainer]?.fixedGroups || []).map((schedule) => schedule.id));
         entries = entries.filter((entry) => {
@@ -994,7 +1305,7 @@
       updateReplacementOptions();
       profileDialog.close();
       render();
-      showToast("Je profiel en tarieven zijn bijgewerkt.");
+      showToast(profileOpenedFromBoard ? `Trainerfiche van ${newName} is bijgewerkt.` : "Je profiel en tarieven zijn bijgewerkt.");
     });
 
     document.getElementById("hoursForm").addEventListener("submit", (event) => {
@@ -1048,13 +1359,14 @@
       document.getElementById("submitPeriodSummary").textContent =
         `${periodLabel(period)} · ${drafts.length} bijgewoonde trainingen · ${String(sumHours(drafts)).replace(".", ",")} uur · ${currency.format(sumAmount(drafts))}${absentCount ? ` · ${absentCount} afwezig afgevinkt en niet meegerekend` : ""}`;
       document.getElementById("confirmReviewed").checked = false;
-      document.getElementById("confirmSubmit").disabled = true;
+      clearSignature();
+      updateSubmitButton();
       document.getElementById("submitConflictWarning").classList.add("hidden");
       submitDialog.showModal();
     });
 
     document.getElementById("confirmReviewed").addEventListener("change", (event) => {
-      document.getElementById("confirmSubmit").disabled = !event.target.checked;
+      updateSubmitButton();
     });
     document.getElementById("cancelSubmit").addEventListener("click", () => submitDialog.close());
     submitDialog.addEventListener("click", (event) => {
@@ -1062,7 +1374,10 @@
     });
     document.getElementById("submitConfirmForm").addEventListener("submit", (event) => {
       event.preventDefault();
-      if (!document.getElementById("confirmReviewed").checked) return;
+      if (!document.getElementById("confirmReviewed").checked || !signatureHasInk) {
+        updateSubmitButton();
+        return;
+      }
       const periodKey = trainerPeriodSelect.value;
       const selectedTrainer = document.getElementById("trainerPerson").value;
       const conflicts = matchingReplacementConflicts(selectedTrainer, periodKey);
@@ -1080,6 +1395,10 @@
         return;
       }
       drafts.forEach((entry) => { entry.status = "Ingediend"; });
+      periodSubmissions[`${selectedTrainer}|${periodKey}`] = {
+        signature: signatureCanvas.toDataURL("image/png"),
+        signedAt: new Date().toISOString()
+      };
       const period = periodForDate(`${periodKey}-01`);
       submitDialog.close();
       render();
@@ -1090,6 +1409,10 @@
       const button = event.target.closest("button[data-action]");
       if (!button) return;
       const action = button.dataset.action;
+      if (action === "profile") {
+        openProfile(button.dataset.trainer, true);
+        return;
+      }
       if (action === "edit") {
         const entry = entries.find((item) => item.id === Number(button.dataset.id));
         if (!entry) return;
