@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f5">
+  <title>De Gympies - Urenregistratie</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body { background: #f5f7f5; }
+    button, input, select { font: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid rgba(15, 118, 110, .24);
+      outline-offset: 2px;
+    }
+    .entry-card { animation: appear .22s ease-out; }
+    @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    dialog::backdrop { background: rgba(15, 23, 42, .38); backdrop-filter: blur(2px); }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 antialiased">
+  <header class="sticky top-0 z-20 border-b border-slate-200/80 bg-white/95 backdrop-blur">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <a href="#" class="flex min-w-0 items-center gap-3" aria-label="De Gympies startpagina">
+        <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-teal-700 text-white shadow-sm" aria-hidden="true">
+          <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 17.5 8 13l3 2.5 5-7 4 3M5 6.5h.01M18.5 18.5h.01"/>
+            <circle cx="5" cy="6.5" r="1.5"/><circle cx="18.5" cy="18.5" r="1.5"/>
+          </svg>
+        </span>
+        <span class="min-w-0">
+          <span class="block truncate text-sm font-bold tracking-tight text-slate-900 sm:text-base">De Gympies</span>
+          <span class="block text-xs text-slate-500">Urenregistratie</span>
+        </span>
+      </a>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="profileButton" type="button" class="flex items-center gap-2 rounded-xl px-2 py-1.5 transition hover:bg-slate-50" aria-haspopup="dialog">
+          <span id="avatarInitials" class="grid h-8 w-8 place-items-center rounded-full bg-amber-100 text-xs font-bold text-amber-900" aria-hidden="true">NW</span>
+          <span id="headerUserName" class="hidden text-sm font-medium text-slate-700 sm:inline">Noor Willems</span>
+          <span class="hidden text-xs text-slate-400 sm:inline">Profiel</span>
+        </button>
+        <span class="mx-1 hidden h-7 w-px bg-slate-200 sm:block" aria-hidden="true"></span>
+        <div class="flex rounded-xl bg-slate-100 p-1" role="group" aria-label="Kies weergave">
+          <button id="trainerTab" type="button" aria-pressed="true" class="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-teal-800 shadow-sm transition sm:text-sm">Trainer</button>
+          <button id="boardTab" type="button" aria-pressed="false" class="rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:text-slate-800 sm:text-sm">Bestuur</button>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-slate-100 px-4 py-2 sm:hidden">
+      <button id="mobileProfileButton" type="button" class="mx-auto flex w-full max-w-6xl items-center gap-2 text-left text-xs font-medium text-slate-600" aria-haspopup="dialog">
+        <span id="mobileAvatarInitials" class="grid h-6 w-6 place-items-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-900" aria-hidden="true">NW</span>
+        Ingelogd als <span id="mobileUserName">Noor Willems</span>
+        <span class="ml-auto text-teal-700">Profiel</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-4 pb-12 pt-7 sm:px-6 sm:pt-10 lg:px-8">
+    <section id="trainerView" aria-labelledby="trainerHeading">
+      <div class="mb-7">
+        <p class="mb-2 text-sm font-semibold text-teal-700">Jouw overzicht</p>
+        <h1 id="trainerHeading" class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Hallo, Noor <span aria-hidden="true">👋</span></h1>
+        <p class="mt-2 text-sm leading-6 text-slate-500 sm:text-base">Registreer je training en houd je uren eenvoudig bij.</p>
+      </div>
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div>
+          <p class="text-sm font-bold text-slate-900">Registreren voor</p>
+          <p class="mt-1 text-xs text-slate-500">Kies de officiële lesgever die deze training heeft gegeven.</p>
+        </div>
+        <select id="trainerPerson" aria-label="Lesgever voor de urenregistratie" class="min-w-48 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700"></select>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="addHeading">
+          <div class="mb-5 flex items-start gap-3">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-700" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+            </span>
+            <div>
+              <h2 id="addHeading" class="font-bold text-slate-900">Uren toevoegen</h2>
+              <p class="mt-1 text-sm text-slate-500">Vul de gegevens van je training in.</p>
+            </div>
+          </div>
+
+          <form id="hoursForm" class="space-y-4">
+            <div>
+              <label for="date" class="mb-1.5 block text-sm font-semibold text-slate-700">Datum</label>
+              <input id="date" name="date" type="date" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-800 shadow-sm transition focus:border-teal-600 focus:outline-none">
+            </div>
+            <div>
+              <label for="group" class="mb-1.5 block text-sm font-semibold text-slate-700">Groep</label>
+              <select id="group" name="group" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-800 shadow-sm focus:border-teal-600 focus:outline-none">
+                <option value="" disabled selected>Kies een groep</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="hours" class="mb-1.5 block text-sm font-semibold text-slate-700">Duur</label>
+                <select id="hours" name="hours" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-800 shadow-sm focus:border-teal-600 focus:outline-none">
+                  <option value="1">1 uur</option>
+                  <option value="1.5">1,5 uur</option>
+                  <option value="2">2 uur</option>
+                </select>
+              </div>
+              <div>
+                <label for="role" class="mb-1.5 block text-sm font-semibold text-slate-700">Roltype</label>
+                <select id="role" name="role" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-800 shadow-sm focus:border-teal-600 focus:outline-none">
+                  <option>REC HOOFD</option>
+                  <option>REC HULP</option>
+                  <option>COMP HOOFD</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label for="replacementFor" class="mb-1.5 block text-sm font-semibold text-slate-700">Ik vervang trainer <span class="font-normal text-slate-400">(optioneel)</span></label>
+              <select id="replacementFor" name="replacementFor" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-800 shadow-sm focus:border-teal-600 focus:outline-none">
+                <option value="">Geen vervanging</option>
+              </select>
+              <p class="mt-1.5 text-xs leading-5 text-slate-500">Zo voorkomen we dat dezelfde training dubbel wordt uitbetaald.</p>
+            </div>
+            <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-teal-700">
+              <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+              Voeg toe
+            </button>
+          </form>
+        </section>
+
+        <section aria-labelledby="historyHeading">
+          <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 id="historyHeading" class="text-lg font-bold tracking-tight text-slate-900">Mijn uren</h2>
+              <p id="currentMonth" class="mt-1 text-sm text-slate-500"></p>
+            </div>
+            <label class="text-xs font-semibold text-slate-500">Periode
+              <select id="trainerPeriod" class="ml-1 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700"></select>
+            </label>
+          </div>
+          <div id="periodCalculation" class="mb-4 rounded-2xl border border-teal-100 bg-teal-50/70 p-4"></div>
+          <div class="mb-2 flex items-center justify-between">
+            <p id="historyMonthLabel" class="text-xs font-semibold uppercase tracking-wide text-slate-400"></p>
+            <span id="monthAmount" class="text-xs font-semibold text-teal-800"></span>
+          </div>
+          <div id="trainerEntries" class="space-y-3" aria-live="polite"></div>
+          <div id="emptyHistory" class="hidden rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-9 text-center">
+            <span class="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-slate-100 text-slate-500" aria-hidden="true">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="5" width="16" height="15" rx="2"/><path stroke-linecap="round" d="M8 3v4m8-4v4M4 10h16"/></svg>
+            </span>
+            <p class="text-sm font-semibold text-slate-700">Nog geen uren deze maand</p>
+            <p class="mt-1 text-sm text-slate-500">Je toegevoegde trainingen verschijnen hier.</p>
+          </div>
+          <div id="replacementAlerts" class="mt-4 hidden rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900" role="alert"></div>
+          <button id="submitPeriod" type="button" class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-slate-900">
+            Dien periode in <span class="font-medium text-slate-300">(2 maanden)</span>
+            <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>
+          </button>
+          <p class="mt-2 text-center text-xs text-slate-400">Je volledige tweemaandelijkse onkostenstaat wordt ter goedkeuring aangeboden.</p>
+        </section>
+      </div>
+    </section>
+
+    <section id="boardView" class="hidden" aria-labelledby="boardHeading">
+      <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p class="mb-2 text-sm font-semibold text-teal-700">Bestuur</p>
+          <h1 id="boardHeading" class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Onkosten goedkeuren</h1>
+          <p class="mt-2 text-sm leading-6 text-slate-500">Beoordeel per trainer en periode van twee maanden.</p>
+        </div>
+        <div class="flex gap-2">
+          <div class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+            <p class="text-[11px] font-medium uppercase tracking-wide text-slate-400">Totaal</p>
+            <p id="boardCount" class="mt-0.5 text-lg font-bold text-slate-900">0</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+            <p class="text-[11px] font-medium uppercase tracking-wide text-slate-400">Te beoordelen</p>
+            <p id="pendingCount" class="mt-0.5 text-lg font-bold text-amber-700">0</p>
+          </div>
+        </div>
+      </div>
+      <section class="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-labelledby="additionalTrainersHeading">
+        <div class="mb-4">
+          <h2 id="additionalTrainersHeading" class="font-bold text-slate-900">Extra officiële lesgevers</h2>
+          <p class="mt-1 text-xs leading-5 text-slate-500">Bestuur activeert maximaal twee aparte profielen per trainer. Registreer alleen uren van personen die de les effectief hebben gegeven; elke lesgever dient apart in en krijgt een aparte goedkeuring en PDF. Deze demo controleert geen wettelijke dag- of jaarmaxima; controleer die maxima afzonderlijk.</p>
+        </div>
+        <div id="additionalTrainerSlots" class="grid gap-3 sm:grid-cols-2"></div>
+        <button id="saveAdditionalTrainers" type="button" class="mt-3 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-slate-800">Profielen opslaan</button>
+      </section>
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div>
+          <p class="text-sm font-bold text-slate-900">Periode van twee maanden</p>
+          <p class="mt-1 text-xs text-slate-500">Bijvoorbeeld september–oktober of november–december</p>
+        </div>
+        <select id="boardPeriod" aria-label="Kies tweemaandelijkse periode" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700"></select>
+      </div>
+      <div id="boardEntries" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3"></div>
+      <div id="emptyBoard" class="hidden rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center">
+        <p class="text-sm font-semibold text-slate-700">Geen ingediende onkosten in deze periode</p>
+        <p class="mt-1 text-sm text-slate-500">Ingediende trainers verschijnen hier voor goedkeuring.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="pointer-events-none fixed bottom-5 left-1/2 z-40 hidden -translate-x-1/2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-lg" role="status" aria-live="polite"></div>
+
+  <dialog id="editDialog" class="w-[min(92vw,28rem)] rounded-2xl border-0 p-0 shadow-2xl">
+    <form id="editForm" class="p-5 sm:p-6">
+      <div class="mb-5 flex items-start justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">Uren bewerken</h2>
+          <p id="editTrainer" class="mt-1 text-sm text-slate-500"></p>
+        </div>
+        <button id="closeEdit" type="button" aria-label="Sluiten" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <input id="editId" name="id" type="hidden">
+      <div class="space-y-4">
+        <div><label for="editDate" class="mb-1.5 block text-sm font-semibold text-slate-700">Datum</label><input id="editDate" name="date" type="date" required class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+        <div><label for="editGroup" class="mb-1.5 block text-sm font-semibold text-slate-700">Groep</label><select id="editGroup" name="group" required class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></select></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label for="editHours" class="mb-1.5 block text-sm font-semibold text-slate-700">Duur</label><select id="editHours" name="hours" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm focus:border-teal-600 focus:outline-none"><option value="1">1 uur</option><option value="1.5">1,5 uur</option><option value="2">2 uur</option></select></div>
+          <div><label for="editRole" class="mb-1.5 block text-sm font-semibold text-slate-700">Roltype</label><select id="editRole" name="role" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm focus:border-teal-600 focus:outline-none"><option>REC HOOFD</option><option>REC HULP</option><option>COMP HOOFD</option></select></div>
+        </div>
+        <div><label for="editReplacementFor" class="mb-1.5 block text-sm font-semibold text-slate-700">Ik vervang trainer</label><select id="editReplacementFor" name="replacementFor" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"><option value="">Geen vervanging</option></select></div>
+      </div>
+      <div class="mt-6 flex gap-3">
+        <button id="cancelEdit" type="button" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Annuleren</button>
+        <button type="submit" class="flex-1 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white hover:bg-teal-800">Opslaan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="profileDialog" class="max-h-[90vh] w-[min(92vw,34rem)] overflow-y-auto rounded-2xl border-0 p-0 shadow-2xl">
+    <form id="profileForm" class="p-5 sm:p-6">
+      <div class="mb-5 flex items-start justify-between">
+        <div>
+          <p class="text-sm font-semibold text-teal-700">Trainerprofiel</p>
+          <h2 class="mt-1 text-xl font-bold text-slate-900">Persoonlijke gegevens & tarieven</h2>
+          <p class="mt-1 text-sm text-slate-500">Je tarieven bepalen automatisch je vergoedingsberekening.</p>
+        </div>
+        <button id="closeProfile" type="button" aria-label="Sluiten" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div><label for="fixedProfileTarget" class="mb-1.5 block text-sm font-semibold text-slate-700">Vaste uren voor profiel</label><select id="fixedProfileTarget" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></select></div>
+        <div><label for="profileName" class="mb-1.5 block text-sm font-semibold text-slate-700">Naam</label><input id="profileName" name="name" required maxlength="80" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div><label for="profileEmail" class="mb-1.5 block text-sm font-semibold text-slate-700">E-mailadres</label><input id="profileEmail" name="email" type="email" maxlength="120" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+          <div><label for="profilePhone" class="mb-1.5 block text-sm font-semibold text-slate-700">Telefoon</label><input id="profilePhone" name="phone" type="tel" maxlength="30" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+        </div>
+        <div><label for="profileAddress" class="mb-1.5 block text-sm font-semibold text-slate-700">Adres</label><input id="profileAddress" name="address" maxlength="140" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+        <fieldset class="rounded-xl border border-slate-200 p-4">
+          <legend class="px-1 text-sm font-bold text-slate-800">Uurtarieven</legend>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label for="rateHelp" class="mb-1.5 block text-sm font-medium text-slate-600">Hulp (€/uur)</label><input id="rateHelp" name="rateHelp" type="number" min="0" max="500" step="0.01" required class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+            <div><label for="rateHead" class="mb-1.5 block text-sm font-medium text-slate-600">Hoofd (€/uur)</label><input id="rateHead" name="rateHead" type="number" min="0" max="500" step="0.01" required class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+          </div>
+        </fieldset>
+        <fieldset class="rounded-xl border border-slate-200 p-4">
+          <legend class="px-1 text-sm font-bold text-slate-800">Vaste lesgroepen</legend>
+          <p class="mb-3 text-xs leading-5 text-slate-500">Kies groep, lesdag, standaardduur en rol. De trainingen worden voor de gekozen tweemaandsperiode automatisch klaargezet.</p>
+          <div id="fixedGroupsList" class="mb-3 space-y-2"></div>
+          <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <select id="fixedGroup" aria-label="Vaste lesgroep" class="col-span-2 rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs sm:col-span-1"></select>
+            <select id="fixedWeekday" aria-label="Lesdag" class="rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs">
+              <option value="1">Maandag</option><option value="2">Dinsdag</option><option value="3">Woensdag</option><option value="4">Donderdag</option><option value="5">Vrijdag</option><option value="6" selected>Zaterdag</option><option value="0">Zondag</option>
+            </select>
+            <select id="fixedHours" aria-label="Standaardduur" class="rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs"><option value="1">1 uur</option><option value="1.5">1,5 uur</option><option value="2">2 uur</option></select>
+            <select id="fixedRole" aria-label="Standaardrol" class="rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs"><option>REC HOOFD</option><option>REC HULP</option><option>COMP HOOFD</option></select>
+          </div>
+          <button id="addFixedGroup" type="button" class="mt-2 rounded-lg px-2 py-2 text-xs font-bold text-teal-800 hover:bg-teal-50">+ Vaste lesgroep toevoegen</button>
+        </fieldset>
+      </div>
+      <div class="mt-6 flex gap-3">
+        <button id="cancelProfile" type="button" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Annuleren</button>
+        <button type="submit" class="flex-1 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white hover:bg-teal-800">Profiel opslaan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="submitDialog" class="max-h-[90vh] w-[min(92vw,30rem)] overflow-y-auto rounded-2xl border-0 p-0 shadow-2xl">
+    <form id="submitConfirmForm" class="p-5 sm:p-6">
+      <div class="mb-4">
+        <p class="text-sm font-semibold text-amber-700">Laatste controle</p>
+        <h2 class="mt-1 text-xl font-bold text-slate-900">Onkostenstaat indienen?</h2>
+        <p id="submitPeriodSummary" class="mt-2 text-sm text-slate-600"></p>
+      </div>
+      <div id="submitConflictWarning" class="mb-4 hidden rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900" role="alert"></div>
+      <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-950">
+        Controleer voor je indient of alle trainingen, aanwezigheden, vervangingen en uren kloppen. Afgevinkte afwezigheden worden niet op de onkostenstaat gezet.
+      </div>
+      <label class="mt-4 flex items-start gap-2.5 text-sm leading-5 text-slate-700">
+        <input id="confirmReviewed" type="checkbox" class="mt-1 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600">
+        <span>Ik heb alles nagekeken en bevestig dat deze onkostenstaat correct is.</span>
+      </label>
+      <div class="mt-6 flex gap-3">
+        <button id="cancelSubmit" type="button" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Terug nakijken</button>
+        <button id="confirmSubmit" type="submit" disabled class="flex-1 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white enabled:hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50">Indienen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const today = new Date();
+    const isoDate = (year, month, day) => `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const currentMonthDate = (day) => isoDate(today.getFullYear(), today.getMonth() + 1, day);
+    const trainingGroups = [
+      ["Kleutergym", "K12wo13u40"], ["Kleutergym", "K12wo14u40"], ["Kleutergym", "K12za9u10"],
+      ["Kleutergym", "K12za10u10"], ["Kleutergym", "K12za11u10"], ["Kleutergym", "K3wo16u10"],
+      ["Kleutergym", "K3za9u40"], ["Kleutergym", "K3zo"],
+      ["Toestelturnen jongens", "J123midza"], ["Toestelturnen jongens", "J123zo"], ["Toestelturnen jongens", "J456zo"],
+      ["Toestelturnen meisjes", "M12di"], ["Toestelturnen meisjes", "M12wo"], ["Toestelturnen meisjes", "M12za"],
+      ["Toestelturnen meisjes", "M12zo"], ["Toestelturnen meisjes", "M34di"], ["Toestelturnen meisjes", "M34wo"],
+      ["Toestelturnen meisjes", "M34do"], ["Toestelturnen meisjes", "M34za"], ["Toestelturnen meisjes", "M56wo"],
+      ["Toestelturnen meisjes", "M56do"], ["Toestelturnen meisjes", "M56za"], ["Toestelturnen meisjes", "M123midza"],
+      ["Open Gym", "OGvr20u40"],
+      ["Trampoline", "TRA12ma"], ["Trampoline", "TRA123za"], ["Trampoline", "TRA34ma"],
+      ["Trampoline", "TRA456za"], ["Trampoline", "TRA56ma"], ["Trampoline", "TRAmidvr"],
+      ["Tumbling", "TUM34wo"], ["Tumbling", "TUM34za"], ["Tumbling", "TUM56wo"],
+      ["Tumbling", "TUM56za"], ["Tumbling", "TUMmid+wo"],
+      ["Ropeskipping", "ROPEzo9u40"], ["GGym", "G-gym jeugd"], ["Wedstrijdgroep", "COMP AGD"]
+    ];
+    const groupLabel = (code) => {
+      const group = trainingGroups.find((item) => item[1] === code);
+      return group ? `${group[0]} · ${group[1]}` : code;
+    };
+    const addGroupOptions = (select) => {
+      const categories = [...new Set(trainingGroups.map(([category]) => category))];
+      categories.forEach((category) => {
+        const group = document.createElement("optgroup");
+        group.label = category;
+        trainingGroups.filter((item) => item[0] === category).forEach(([, code]) => {
+          const option = document.createElement("option");
+          option.value = code;
+          option.textContent = code;
+          group.append(option);
+        });
+        select.append(group);
+      });
+    };
+    addGroupOptions(document.getElementById("group"));
+    addGroupOptions(document.getElementById("editGroup"));
+    addGroupOptions(document.getElementById("fixedGroup"));
+
+    let currentUser = "Noor Vandenberg";
+    let trainerProfiles = {
+      "Noor Vandenberg": { email: "noor.vandenberg@example.com", phone: "000 00 00 00", address: "Demo straat 1, 0000 Demo", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 1, group: "K12za11u10", weekday: 6, hours: 1, role: "REC HOOFD" }], additionalProfiles: [{ name: "Emma De Smet", enabled: true }, { name: "Bram Jacobs", enabled: false }] },
+      "Lotte Peeters": { email: "lotte.peeters@example.com", phone: "", address: "", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
+      "Milan Vermeulen": { email: "milan.vermeulen@example.com", phone: "", address: "", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
+      "Emma De Smet": { email: "emma.desmet@example.com", phone: "", address: "", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 101, group: "G-gym jeugd", weekday: 6, hours: 1, role: "REC HULP" }], owner: "Noor Vandenberg", isAdditional: true, enabled: true },
+      "Bram Jacobs": { email: "bram.jacobs@example.com", phone: "", address: "", rateHelp: 8, rateHead: 14, fixedGroups: [], owner: "Noor Vandenberg", isAdditional: true, enabled: false }
+    };
+    const todayString = isoDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    let entries = [
+      { id: 1, trainer: currentUser, date: "2026-09-06", group: "K12za9u10", hours: 1, role: "REC HOOFD", status: "Concept" },
+      { id: 2, trainer: currentUser, date: "2026-09-12", group: "G-gym jeugd", hours: 1, role: "REC HOOFD", replacementFor: "Milan Vermeulen", status: "Concept" },
+      { id: 3, trainer: "Lotte Peeters", date: "2026-09-12", group: "M12za", hours: 1.5, role: "REC HOOFD", status: "Ingediend" },
+      { id: 4, trainer: "Milan Vermeulen", date: "2026-10-10", group: "J123zo", hours: 2, role: "COMP HOOFD", status: "Ingediend" },
+      { id: 5, trainer: currentUser, date: todayString, group: "K12za9u10", hours: 1, role: "REC HOOFD", status: "Concept" },
+      { id: 6, trainer: "Lotte Peeters", date: "2026-10-15", group: "G-gym jeugd", hours: 1, role: "REC HULP", status: "Ingediend" },
+      { id: 7, trainer: "Milan Vermeulen", date: "2026-09-12", group: "G-gym jeugd", hours: 1, role: "REC HOOFD", status: "Concept" },
+      { id: 8, trainer: "Emma De Smet", date: "2026-09-05", group: "G-gym jeugd", hours: 1, role: "REC HULP", status: "Concept" }
+    ];
+    let nextId = Math.max(...entries.map((entry) => entry.id)) + 1;
+    let nextFixedGroupId = 2;
+    let toastTimeout;
+
+    const trainerView = document.getElementById("trainerView");
+    const boardView = document.getElementById("boardView");
+    const trainerTab = document.getElementById("trainerTab");
+    const boardTab = document.getElementById("boardTab");
+    const trainerEntries = document.getElementById("trainerEntries");
+    const boardEntries = document.getElementById("boardEntries");
+    const editDialog = document.getElementById("editDialog");
+    const profileDialog = document.getElementById("profileDialog");
+    const submitDialog = document.getElementById("submitDialog");
+    const monthNames = new Intl.DateTimeFormat("nl-BE", { month: "long" });
+    const currency = new Intl.NumberFormat("nl-BE", { style: "currency", currency: "EUR" });
+    const allMonths = new Intl.DateTimeFormat("nl-BE", { month: "long", year: "numeric" });
+
+    function periodForDate(dateString) {
+      const [year, month] = dateString.split("-").map(Number);
+      const startMonth = Math.floor((month - 1) / 2) * 2 + 1;
+      return { key: `${year}-${String(startMonth).padStart(2, "0")}`, year, startMonth };
+    }
+
+    function periodMonths(period) {
+      return [period.startMonth, period.startMonth + 1].map((month) => new Date(period.year, month - 1, 1));
+    }
+
+    function periodLabel(period) {
+      const [first, second] = periodMonths(period);
+      const firstName = monthNames.format(first);
+      const secondName = monthNames.format(second);
+      return `${firstName}–${secondName} ${period.year}`;
+    }
+
+    function createPeriodOptions(select, selectedKey) {
+      const periods = [];
+      for (let year = today.getFullYear() - 2; year <= today.getFullYear() + 1; year += 1) {
+        for (let month = 1; month <= 11; month += 2) periods.push({ key: `${year}-${String(month).padStart(2, "0")}`, year, startMonth: month });
+      }
+      select.innerHTML = periods.map((period) => `<option value="${period.key}">${escapeHtml(periodLabel(period))}</option>`).join("");
+      select.value = selectedKey;
+    }
+
+    const currentPeriod = periodForDate(todayString);
+    const trainerPeriodSelect = document.getElementById("trainerPeriod");
+    const boardPeriodSelect = document.getElementById("boardPeriod");
+    const weekdays = ["Zondag", "Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag"];
+    let fixedScheduleTarget = currentUser;
+    function updateReplacementOptions() {
+      [document.getElementById("replacementFor"), document.getElementById("editReplacementFor")].forEach((select) => {
+        const previous = select.value;
+        select.innerHTML = `<option value="">Geen vervanging</option>`;
+        const selectedTrainer = document.getElementById("trainerPerson")?.value || currentUser;
+        Object.keys(trainerProfiles).filter((trainer) => !trainerProfiles[trainer].isAdditional
+          || trainerProfiles[trainer].enabled).forEach((trainer) => {
+          if (trainer === selectedTrainer) return;
+          const option = document.createElement("option");
+          option.value = trainer;
+          option.textContent = trainer;
+          select.append(option);
+        });
+        select.value = previous;
+      });
+    }
+    updateReplacementOptions();
+    createPeriodOptions(trainerPeriodSelect, currentPeriod.key);
+    createPeriodOptions(boardPeriodSelect, currentPeriod.key);
+    document.getElementById("date").value = todayString;
+
+    function ensureRecurringEntries(trainerName, periodKey) {
+      const profile = trainerProfiles[trainerName];
+      if (!profile?.fixedGroups?.length) return;
+      if (profile.isAdditional && (!profile.enabled || profile.owner !== currentUser)) return;
+      const period = periodForDate(`${periodKey}-01`);
+      const [firstMonth, secondMonth] = periodMonths(period);
+      const firstDay = new Date(firstMonth.getFullYear(), firstMonth.getMonth(), 1);
+      const finalDay = new Date(secondMonth.getFullYear(), secondMonth.getMonth() + 1, 0);
+      const todayLimit = new Date(`${todayString}T12:00:00`);
+      const lastDay = finalDay > todayLimit ? todayLimit : finalDay;
+
+      profile.fixedGroups.forEach((schedule) => {
+        for (let date = new Date(firstDay); date <= lastDay; date.setDate(date.getDate() + 1)) {
+          if (date.getDay() !== Number(schedule.weekday)) continue;
+          const dateString = isoDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+          const recurringKey = `${schedule.id}:${dateString}`;
+          const hasMatchingTraining = entries.some((entry) => entry.trainer === trainerName
+            && entry.date === dateString && entry.group === schedule.group);
+          if (hasMatchingTraining) continue;
+          entries.push({
+            id: nextId++,
+            trainer: trainerName,
+            date: dateString,
+            group: schedule.group,
+            hours: Number(schedule.hours),
+            role: schedule.role,
+            status: "Concept",
+            attended: true,
+            recurringKey
+          });
+        }
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+
+    function displayDate(value) {
+      return new Intl.DateTimeFormat("nl-BE", { day: "numeric", month: "short", year: "numeric" })
+        .format(new Date(`${value}T12:00:00`));
+    }
+
+    function getPeriodEntries(periodKey, trainerName) {
+      return entries.filter((entry) => entry.trainer === trainerName && periodForDate(entry.date).key === periodKey);
+    }
+
+    function additionalProfiles(owner = currentUser) {
+      return (trainerProfiles[owner]?.additionalProfiles || [])
+        .filter((slot) => slot.enabled && trainerProfiles[slot.name]?.owner === owner)
+        .map((slot) => slot.name);
+    }
+
+    function renderTrainerPeople() {
+      const select = document.getElementById("trainerPerson");
+      const previous = select.value || currentUser;
+      const people = [currentUser, ...additionalProfiles()];
+      select.innerHTML = people.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}${name !== currentUser ? " · extra lesgever" : ""}</option>`).join("");
+      select.value = people.includes(previous) ? previous : currentUser;
+      fixedScheduleTarget = trainerProfiles[fixedScheduleTarget]?.isAdditional
+        ? (people.includes(fixedScheduleTarget) ? fixedScheduleTarget : currentUser)
+        : currentUser;
+    }
+
+    function getReplacementConflicts(trainerName, periodKey) {
+      return getPeriodEntries(periodKey, trainerName)
+        .filter((entry) => entry.status === "Concept" && entry.attended !== false)
+        .flatMap((entry) => {
+          const counterpart = entries.find((other) => other.trainer !== trainerName
+            && other.date === entry.date && other.group === entry.group
+            && other.attended !== false
+            && (other.replacementFor === trainerName || entry.replacementFor === other.trainer));
+          if (!counterpart) return [];
+          if (entry.replacementFor === counterpart.trainer
+            && counterpart.replacementFor !== trainerName
+            && counterpart.status === "Concept") return [];
+          return [{
+            entry,
+            counterpart,
+            message: entry.replacementFor === counterpart.trainer
+              ? `${trainerName} vervangt ${counterpart.trainer}, maar ${counterpart.trainer} heeft deze training al ingediend of goedgekeurd.`
+              : `${counterpart.trainer} heeft aangegeven jou te vervangen. Je kunt ${groupLabel(entry.group)} op ${displayDate(entry.date)} niet zelf indienen.`
+          }];
+        });
+    }
+
+    function rateForEntry(entry, trainerName) {
+      const profile = trainerProfiles[trainerName] || { rateHelp: 8, rateHead: 14 };
+      return entry.role.includes("HULP") ? Number(profile.rateHelp) : Number(profile.rateHead);
+    }
+
+    function amountForEntry(entry) {
+      return Number(entry.hours) * rateForEntry(entry, entry.trainer);
+    }
+
+    function sumHours(items) {
+      return items.filter((entry) => entry.attended !== false).reduce((total, entry) => total + Number(entry.hours), 0);
+    }
+
+    function sumAmount(items) {
+      return items.filter((entry) => entry.attended !== false).reduce((total, entry) => total + amountForEntry(entry), 0);
+    }
+
+    function monthEntriesFor(items, date) {
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      return items.filter((entry) => entry.date.startsWith(key));
+    }
+
+    function statusClass(status) {
+      if (status === "Afwezig") return "bg-slate-100 text-slate-500";
+      if (status === "Goedgekeurd") return "bg-emerald-50 text-emerald-700";
+      if (status === "Ingediend") return "bg-blue-50 text-blue-700";
+      return "bg-amber-50 text-amber-800";
+    }
+
+    function entryDetails(entry, showTrainer = false) {
+      const visibleStatus = entry.attended === false ? "Afwezig" : entry.status;
+      return `
+        <div class="flex min-w-0 items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="truncate text-sm font-bold text-slate-900">${escapeHtml(groupLabel(entry.group))}</p>
+            <p class="mt-1 text-xs text-slate-500">${escapeHtml(displayDate(entry.date))}${showTrainer ? ` <span class="px-1 text-slate-300">·</span> ${escapeHtml(entry.trainer)}` : ""}</p>
+          </div>
+          <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClass(visibleStatus)}">${escapeHtml(visibleStatus)}</span>
+        </div>
+        <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
+          <span class="font-semibold text-slate-800">${escapeHtml(String(entry.hours).replace(".", ","))} uur</span>
+          <span class="h-3 w-px bg-slate-200" aria-hidden="true"></span>
+          <span>${escapeHtml(entry.role)}</span>
+          <span class="ml-auto font-semibold text-teal-800">${escapeHtml(currency.format(amountForEntry(entry)))}</span>
+          ${entry.replacementFor ? `<span class="w-full text-slate-500">Vervangt: <span class="font-medium text-slate-700">${escapeHtml(entry.replacementFor)}</span></span>` : ""}
+          ${entry.replacement ? `<span class="w-full text-slate-500">Opmerking: <span class="font-medium text-slate-700">${escapeHtml(entry.replacement)}</span></span>` : ""}
+        </div>`;
+    }
+
+    function renderTrainer() {
+      const periodKey = trainerPeriodSelect.value;
+      renderTrainerPeople();
+      const selectedTrainer = document.getElementById("trainerPerson").value;
+      [currentUser, ...additionalProfiles()].forEach((trainer) => ensureRecurringEntries(trainer, periodKey));
+      const period = periodForDate(`${periodKey}-01`);
+      const items = getPeriodEntries(periodKey, selectedTrainer).sort((a, b) => b.date.localeCompare(a.date));
+      const months = periodMonths(period);
+      const calculations = months.map((month) => {
+        const itemsForMonth = monthEntriesFor(items, month);
+        return `<div class="flex items-center justify-between gap-3 py-1.5 text-sm">
+          <span class="capitalize text-slate-600">${escapeHtml(allMonths.format(month))}</span>
+          <span class="text-right font-semibold text-slate-800">${String(sumHours(itemsForMonth)).replace(".", ",")} uur <span class="ml-1 text-teal-800">${escapeHtml(currency.format(sumAmount(itemsForMonth)))}</span></span>
+        </div>`;
+      }).join("");
+      document.getElementById("periodCalculation").innerHTML = `
+        <div class="flex items-center justify-between gap-3">
+          <div><p class="text-xs font-semibold uppercase tracking-wide text-teal-800">Vergoeding · ${escapeHtml(periodLabel(period))}</p><p class="mt-1 text-xs text-slate-500">Berekend met je persoonlijke uurtarieven</p></div>
+          <p class="whitespace-nowrap text-lg font-bold text-teal-900">${escapeHtml(currency.format(sumAmount(items)))}</p>
+        </div>
+        <div class="mt-3 border-t border-teal-100 pt-2">${calculations}</div>`;
+      document.getElementById("historyMonthLabel").textContent = `Uren in ${periodLabel(period)}`;
+      document.getElementById("monthAmount").textContent = `${String(sumHours(items)).replace(".", ",")} uur · ${currency.format(sumAmount(items))}`;
+      trainerEntries.innerHTML = items.map((entry) => `
+        <article class="entry-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          ${entry.recurringKey && entry.status === "Concept" ? `<label class="mb-3 flex items-center gap-2 rounded-lg bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-900"><input type="checkbox" data-action="attendance" data-entry-id="${entry.id}" ${entry.attended !== false ? "checked" : ""} class="h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600"><span>Training bijgewoond · vink uit als je afwezig was</span></label>` : ""}
+          ${entryDetails(entry)}
+        </article>`).join("");
+      document.getElementById("emptyHistory").classList.toggle("hidden", items.length > 0);
+      document.getElementById("currentMonth").textContent = periodLabel(period);
+      const conflicts = getReplacementConflicts(selectedTrainer, periodKey);
+      const replacementAlerts = document.getElementById("replacementAlerts");
+      replacementAlerts.classList.toggle("hidden", conflicts.length === 0);
+      replacementAlerts.innerHTML = conflicts.length
+        ? `<p class="font-bold">Dubbele vervanging gedetecteerd</p><ul class="mt-2 list-disc space-y-1 pl-5">${conflicts.map(({ message }) => `<li>${escapeHtml(message)}</li>`).join("")}</ul><p class="mt-2 text-xs">Los dit eerst op met de andere trainer of het bestuur. De periode kan niet worden ingediend zolang dit conflict bestaat.</p>`
+        : "";
+    }
+
+    function groupedSubmitted(periodKey) {
+      const groups = new Map();
+      entries.filter((entry) => periodForDate(entry.date).key === periodKey && entry.status !== "Concept" && entry.attended !== false).forEach((entry) => {
+        if (!groups.has(entry.trainer)) groups.set(entry.trainer, []);
+        groups.get(entry.trainer).push(entry);
+      });
+      return [...groups.entries()].map(([trainer, items]) => ({ trainer, items: items.sort((a, b) => a.date.localeCompare(b.date)) }))
+        .sort((a, b) => a.trainer.localeCompare(b.trainer));
+    }
+
+    function renderBoard() {
+      const periodKey = boardPeriodSelect.value;
+      const period = periodForDate(`${periodKey}-01`);
+      const trainers = groupedSubmitted(periodKey);
+      renderAdditionalTrainerSlots();
+      boardEntries.innerHTML = trainers.map(({ trainer, items }, index) => {
+        const approved = items.every((entry) => entry.status === "Goedgekeurd");
+        const monthRows = periodMonths(period).map((month) => {
+          const monthItems = monthEntriesFor(items, month);
+          return `<div class="flex items-center justify-between gap-2 py-1 text-xs text-slate-600"><span class="capitalize">${escapeHtml(allMonths.format(month))}</span><span>${String(sumHours(monthItems)).replace(".", ",")} u · ${escapeHtml(currency.format(sumAmount(monthItems)))}</span></div>`;
+        }).join("");
+        const detailRows = items.map((entry) => `
+          <div class="rounded-lg bg-slate-50 p-3">
+            ${entryDetails(entry)}
+            <button type="button" data-action="edit" data-id="${entry.id}" class="mt-2 text-xs font-semibold text-teal-800 hover:underline">Uren bewerken</button>
+          </div>`).join("");
+        return `<article class="entry-card overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div class="p-4 sm:p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-amber-100 text-xs font-bold text-amber-900">${escapeHtml(initials(trainer))}</span>
+                <div class="min-w-0"><h2 class="truncate font-bold text-slate-900">${escapeHtml(trainer)}</h2><p class="mt-0.5 text-xs text-slate-500">${items.length} ${items.length === 1 ? "training" : "trainingen"} · ${escapeHtml(periodLabel(period))}</p></div>
+              </div>
+              <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${approved ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700"}">${approved ? "Goedgekeurd" : "Ingediend"}</span>
+            </div>
+            <div class="mt-4 rounded-xl bg-slate-50 px-3 py-2">${monthRows}
+              <div class="mt-1 flex items-center justify-between border-t border-slate-200 pt-2 text-sm font-bold text-slate-900"><span>Totaal periode</span><span>${escapeHtml(currency.format(sumAmount(items)))}</span></div>
+              <p class="mt-1 text-right text-xs text-slate-500">${String(sumHours(items)).replace(".", ",")} uur totaal</p>
+            </div>
+            <details class="mt-3">
+              <summary class="cursor-pointer list-none text-xs font-semibold text-teal-800">Bekijk ${items.length === 1 ? "training" : "trainingen"} <span aria-hidden="true">⌄</span></summary>
+              <div class="mt-3 space-y-2">${detailRows}</div>
+            </details>
+            <div class="mt-4 border-t border-slate-100 pt-3">
+              ${approved
+                ? `<button type="button" data-action="download" data-trainer="${escapeHtml(trainer)}" data-period="${periodKey}" class="w-full rounded-xl border border-teal-200 px-3 py-2.5 text-xs font-bold text-teal-800 hover:bg-teal-50">Download PDF voor boekhouding</button>`
+                : `<button type="button" data-action="approve" data-trainer="${escapeHtml(trainer)}" data-period="${periodKey}" class="w-full rounded-xl bg-teal-700 px-3 py-2.5 text-xs font-bold text-white transition hover:bg-teal-800">Keur periode goed &amp; maak PDF</button>`}
+            </div>
+          </div>
+        </article>`;
+      }).join("");
+      document.getElementById("emptyBoard").classList.toggle("hidden", trainers.length > 0);
+      document.getElementById("boardCount").textContent = String(trainers.length);
+      document.getElementById("pendingCount").textContent = String(trainers.filter(({ items }) => items.some((entry) => entry.status !== "Goedgekeurd")).length);
+    }
+
+    function renderAdditionalTrainerSlots() {
+      const slots = trainerProfiles[currentUser].additionalProfiles || [];
+      document.getElementById("additionalTrainerSlots").innerHTML = [0, 1].map((index) => {
+        const slot = slots[index] || { name: "", enabled: false };
+        const profile = trainerProfiles[slot.name] || { rateHelp: 8, rateHead: 14 };
+        return `<div class="flex items-start gap-3 rounded-xl border border-slate-200 p-3">
+          <input type="checkbox" aria-label="Activeer extra lesgever ${index + 2}" data-additional-enabled="${index}" ${slot.enabled ? "checked" : ""} class="mt-1 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600">
+          <span class="min-w-0 flex-1">
+            <span class="block text-xs font-semibold text-slate-700">${index + 2}e officiële lesgever</span>
+            <input type="text" data-additional-name="${index}" value="${escapeHtml(slot.name)}" maxlength="80" placeholder="Naam trainer" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none">
+            <span class="mt-2 grid grid-cols-2 gap-2">
+              <span><span class="mb-1 block text-[11px] text-slate-500">Hulp €/uur</span><input type="number" min="0" max="500" step="0.01" data-additional-help="${index}" value="${profile.rateHelp}" class="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-xs"></span>
+              <span><span class="mb-1 block text-[11px] text-slate-500">Hoofd €/uur</span><input type="number" min="0" max="500" step="0.01" data-additional-head="${index}" value="${profile.rateHead}" class="w-full rounded-lg border border-slate-300 px-2.5 py-2 text-xs"></span>
+            </span>
+            <span class="mt-1 block text-[11px] text-slate-500">${slot.enabled ? "Actief · aparte urenstaat en PDF" : "Uitgeschakeld door het bestuur"}</span>
+          </span>
+        </div>`;
+      }).join("");
+    }
+
+    function saveAdditionalTrainerSlots() {
+      const parent = trainerProfiles[currentUser];
+      const oldSlots = parent.additionalProfiles || [];
+      const nextSlots = [0, 1].map((index) => ({
+        oldName: oldSlots[index]?.name || "",
+        name: document.querySelector(`[data-additional-name="${index}"]`).value.trim(),
+        enabled: document.querySelector(`[data-additional-enabled="${index}"]`).checked,
+        rateHelp: Number(document.querySelector(`[data-additional-help="${index}"]`).value),
+        rateHead: Number(document.querySelector(`[data-additional-head="${index}"]`).value)
+      }));
+      const names = nextSlots.map((slot) => slot.name).filter(Boolean);
+      if (new Set(names).size !== names.length) {
+        showToast("Een extra profielnaam mag maar één keer voorkomen.");
+        return;
+      }
+      if (nextSlots.some((slot) => slot.enabled && !slot.name)) {
+        showToast("Vul een naam in voor elk ingeschakeld extra profiel.");
+        return;
+      }
+      if (nextSlots.some((slot) => !Number.isFinite(slot.rateHelp) || slot.rateHelp < 0
+        || !Number.isFinite(slot.rateHead) || slot.rateHead < 0)) {
+        showToast("Vul voor elk extra profiel geldige, niet-negatieve uurtarieven in.");
+        return;
+      }
+      for (const slot of nextSlots) {
+        if (!slot.name) continue;
+        const existing = trainerProfiles[slot.name];
+        if (existing && slot.name !== slot.oldName && !existing.isAdditional) {
+          showToast(`De naam ${slot.name} is al in gebruik door een ander trainerprofiel.`);
+          return;
+        }
+      }
+
+      const updatedSlots = nextSlots.map(({ oldName, name, enabled, rateHelp, rateHead }) => {
+        if (oldName && oldName !== name && trainerProfiles[oldName]?.isAdditional) {
+          const oldProfile = trainerProfiles[oldName];
+          if (name && !trainerProfiles[name]) trainerProfiles[name] = { ...oldProfile, owner: currentUser };
+          else if (!name) delete trainerProfiles[oldName];
+          if (name) {
+            entries.filter((entry) => entry.trainer === oldName).forEach((entry) => { entry.trainer = name; });
+            entries.filter((entry) => entry.replacementFor === oldName).forEach((entry) => { entry.replacementFor = name; });
+            delete trainerProfiles[oldName];
+          }
+        }
+        if (name && !trainerProfiles[name]) {
+          trainerProfiles[name] = { email: "", phone: "", address: "", rateHelp: 8, rateHead: 14, fixedGroups: [], owner: currentUser, isAdditional: true };
+        }
+        if (name && trainerProfiles[name]) {
+          trainerProfiles[name].owner = currentUser;
+          trainerProfiles[name].isAdditional = true;
+          trainerProfiles[name].enabled = enabled;
+          trainerProfiles[name].rateHelp = rateHelp;
+          trainerProfiles[name].rateHead = rateHead;
+        }
+        return name ? { name, enabled, rateHelp, rateHead } : null;
+      }).filter(Boolean);
+      parent.additionalProfiles = updatedSlots;
+      updateReplacementOptions();
+      render();
+      showToast("Extra lesgeverprofielen bijgewerkt.");
+    }
+
+    function initials(name) {
+      return name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+    }
+
+    function renderProfileHeader() {
+      const shortName = currentUser.split(/\s+/)[0];
+      document.getElementById("headerUserName").textContent = currentUser;
+      document.getElementById("mobileUserName").textContent = currentUser;
+      document.getElementById("avatarInitials").textContent = initials(currentUser);
+      document.getElementById("mobileAvatarInitials").textContent = initials(currentUser);
+      document.getElementById("trainerHeading").innerHTML = `Hallo, ${escapeHtml(shortName)} <span aria-hidden="true">👋</span>`;
+    }
+
+    function render() {
+      renderProfileHeader();
+      renderTrainerPeople();
+      renderTrainer();
+      renderBoard();
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.remove("hidden");
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.classList.add("hidden"), 3200);
+    }
+
+    function setView(view) {
+      const isBoard = view === "board";
+      trainerView.classList.toggle("hidden", isBoard);
+      boardView.classList.toggle("hidden", !isBoard);
+      trainerTab.setAttribute("aria-pressed", String(!isBoard));
+      boardTab.setAttribute("aria-pressed", String(isBoard));
+      trainerTab.className = `rounded-lg px-3 py-2 text-xs font-semibold transition sm:text-sm ${!isBoard ? "bg-white text-teal-800 shadow-sm" : "text-slate-500 hover:text-slate-800"}`;
+      boardTab.className = `rounded-lg px-3 py-2 text-xs font-semibold transition sm:text-sm ${isBoard ? "bg-white text-teal-800 shadow-sm" : "text-slate-500 hover:text-slate-800"}`;
+      if (isBoard) renderBoard();
+    }
+
+    function openProfile() {
+      const profile = trainerProfiles[currentUser];
+      document.getElementById("profileName").value = currentUser;
+      document.getElementById("profileEmail").value = profile.email || "";
+      document.getElementById("profilePhone").value = profile.phone || "";
+      document.getElementById("profileAddress").value = profile.address || "";
+      document.getElementById("rateHelp").value = profile.rateHelp;
+      document.getElementById("rateHead").value = profile.rateHead;
+      const targetSelect = document.getElementById("fixedProfileTarget");
+      const fixedPeople = [currentUser, ...additionalProfiles()];
+      targetSelect.innerHTML = fixedPeople.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
+      fixedScheduleTarget = fixedPeople.includes(fixedScheduleTarget) ? fixedScheduleTarget : currentUser;
+      targetSelect.value = fixedScheduleTarget;
+      renderFixedGroups(trainerProfiles[fixedScheduleTarget]?.fixedGroups || []);
+      profileDialog.showModal();
+    }
+
+    function renderFixedGroups(fixedGroups) {
+      const container = document.getElementById("fixedGroupsList");
+      if (fixedGroups.length === 0) {
+        container.innerHTML = `<p class="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">Nog geen vaste lesgroepen ingesteld.</p>`;
+        return;
+      }
+      container.innerHTML = fixedGroups.map((schedule) => `
+        <div data-fixed-group="${schedule.id}" class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-lg bg-slate-50 p-2">
+          <div class="min-w-0">
+            <p class="truncate text-xs font-semibold text-slate-800">${escapeHtml(groupLabel(schedule.group))}</p>
+            <p class="mt-0.5 text-[11px] text-slate-500">${escapeHtml(weekdays[schedule.weekday])} · ${escapeHtml(String(schedule.hours).replace(".", ","))} uur · ${escapeHtml(schedule.role)}</p>
+          </div>
+          <button type="button" data-remove-fixed="${schedule.id}" class="rounded-lg px-2.5 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100">Verwijder</button>
+          <input type="hidden" data-fixed-value="group" value="${escapeHtml(schedule.group)}">
+          <input type="hidden" data-fixed-value="weekday" value="${schedule.weekday}">
+          <input type="hidden" data-fixed-value="hours" value="${schedule.hours}">
+          <input type="hidden" data-fixed-value="role" value="${escapeHtml(schedule.role)}">
+        </div>`).join("");
+    }
+
+    function readFixedGroupsFromProfile() {
+      return [...document.querySelectorAll("#fixedGroupsList [data-fixed-group]")].map((row) => ({
+        id: Number(row.dataset.fixedGroup),
+        group: row.querySelector('[data-fixed-value="group"]').value,
+        weekday: Number(row.querySelector('[data-fixed-value="weekday"]').value),
+        hours: Number(row.querySelector('[data-fixed-value="hours"]').value),
+        role: row.querySelector('[data-fixed-value="role"]').value
+      }));
+    }
+
+    function matchingReplacementConflicts(trainer, periodKey) {
+      return getReplacementConflicts(trainer, periodKey);
+    }
+
+    function createAccountingPdf(trainer, periodKey, items) {
+      const JsPDF = window.jspdf?.jsPDF;
+      if (!JsPDF) throw new Error("De PDF-bibliotheek kon niet worden geladen. Controleer je internetverbinding en probeer opnieuw.");
+      const period = periodForDate(`${periodKey}-01`);
+      const profile = trainerProfiles[trainer] || {};
+      const pdf = new JsPDF();
+      let y = 20;
+      const line = (text, size = 11, bold = false) => {
+        pdf.setFont("helvetica", bold ? "bold" : "normal");
+        pdf.setFontSize(size);
+        pdf.text(String(text), 18, y);
+        y += size * 0.55 + 3;
+      };
+      line("De Gympies - Onkostenstaat", 18, true);
+      line(`Periode: ${periodLabel(period)}`, 12, true);
+      line(`Trainer: ${trainer}`, 11);
+      if (profile.email) line(`E-mail: ${profile.email}`);
+      if (profile.address) line(`Adres: ${profile.address}`);
+      y += 4;
+      line("Berekening per maand", 12, true);
+      const months = periodMonths(period);
+      months.forEach((month) => {
+        const monthly = monthEntriesFor(items, month);
+        line(`${allMonths.format(month)}: ${sumHours(monthly)} uur - ${currency.format(sumAmount(monthly))}`);
+      });
+      y += 4;
+      line("Geregistreerde trainingen per maand", 12, true);
+      months.forEach((month) => {
+        const monthly = monthEntriesFor(items, month).sort((a, b) => a.date.localeCompare(b.date));
+        if (monthly.length === 0) return;
+        if (y > 265) { pdf.addPage(); y = 20; }
+        line(allMonths.format(month), 10, true);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(9);
+        pdf.text("Datum", 18, y);
+        pdf.text("Groep / rol", 48, y);
+        pdf.text("Uren", 143, y);
+        pdf.text("Bedrag", 165, y);
+        y += 7;
+        pdf.setFont("helvetica", "normal");
+        monthly.forEach((entry) => {
+          if (y > 275) { pdf.addPage(); y = 20; }
+          pdf.text(displayDate(entry.date), 18, y);
+          const groupText = `${entry.group} · ${entry.role}${entry.replacementFor ? ` · vervangt ${entry.replacementFor}` : ""}`;
+          pdf.text(groupText.substring(0, 46), 48, y);
+          pdf.text(String(entry.hours), 143, y);
+          pdf.text(currency.format(amountForEntry(entry)), 165, y);
+          y += 7;
+        });
+        y += 3;
+      });
+      y += 3;
+      pdf.setFont("helvetica", "bold");
+      pdf.text(`Totaal ${sumHours(items)} uur`, 18, y);
+      pdf.text(currency.format(sumAmount(items)), 165, y);
+      y += 10;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      pdf.text(`Goedgekeurd op ${displayDate(todayString)} - De Gympies`, 18, y);
+      const fileName = `onkostenstaat-${trainer.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${periodKey}.pdf`;
+      pdf.save(fileName);
+    }
+
+    trainerTab.addEventListener("click", () => setView("trainer"));
+    boardTab.addEventListener("click", () => setView("board"));
+    trainerPeriodSelect.addEventListener("change", renderTrainer);
+    boardPeriodSelect.addEventListener("change", renderBoard);
+    document.getElementById("profileButton").addEventListener("click", openProfile);
+    document.getElementById("mobileProfileButton").addEventListener("click", openProfile);
+    document.getElementById("trainerPerson").addEventListener("change", (event) => {
+      const selected = event.target.value;
+      document.getElementById("replacementFor").value = "";
+      updateReplacementOptions();
+      document.getElementById("replacementFor").value = "";
+      renderTrainer();
+    });
+    document.getElementById("fixedProfileTarget").addEventListener("change", (event) => {
+      fixedScheduleTarget = event.target.value;
+      renderFixedGroups(trainerProfiles[fixedScheduleTarget]?.fixedGroups || []);
+    });
+    document.getElementById("saveAdditionalTrainers").addEventListener("click", saveAdditionalTrainerSlots);
+    document.getElementById("closeProfile").addEventListener("click", () => profileDialog.close());
+    document.getElementById("cancelProfile").addEventListener("click", () => profileDialog.close());
+    profileDialog.addEventListener("click", (event) => {
+      if (event.target === profileDialog) profileDialog.close();
+    });
+    document.getElementById("addFixedGroup").addEventListener("click", () => {
+      const schedule = {
+        id: nextFixedGroupId++,
+        group: document.getElementById("fixedGroup").value,
+        weekday: Number(document.getElementById("fixedWeekday").value),
+        hours: Number(document.getElementById("fixedHours").value),
+        role: document.getElementById("fixedRole").value
+      };
+      const fixedGroups = readFixedGroupsFromProfile();
+      if (fixedGroups.some((item) => item.group === schedule.group && item.weekday === schedule.weekday)) {
+        showToast("Deze vaste groep staat al op die lesdag in je profiel.");
+        return;
+      }
+      fixedGroups.push(schedule);
+      renderFixedGroups(fixedGroups);
+    });
+    document.getElementById("fixedGroupsList").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-remove-fixed]");
+      if (!button) return;
+      const fixedGroups = readFixedGroupsFromProfile().filter((item) => item.id !== Number(button.dataset.removeFixed));
+      renderFixedGroups(fixedGroups);
+    });
+
+    document.getElementById("profileForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const oldName = currentUser;
+      const newName = String(formData.get("name")).trim();
+      if (newName !== oldName && trainerProfiles[newName]) {
+        showToast("Er bestaat al een profiel met deze naam.");
+        return;
+      }
+      const fixedGroups = readFixedGroupsFromProfile();
+      const primaryFixedGroups = fixedScheduleTarget === oldName
+        ? fixedGroups
+        : trainerProfiles[oldName].fixedGroups || [];
+      trainerProfiles[newName] = {
+        email: String(formData.get("email")).trim(),
+        phone: String(formData.get("phone")).trim(),
+        address: String(formData.get("address")).trim(),
+        rateHelp: Number(formData.get("rateHelp")),
+        rateHead: Number(formData.get("rateHead")),
+        fixedGroups: primaryFixedGroups,
+        additionalProfiles: trainerProfiles[newName]?.additionalProfiles || trainerProfiles[oldName].additionalProfiles || []
+      };
+      if (fixedScheduleTarget !== oldName && trainerProfiles[fixedScheduleTarget]) {
+        trainerProfiles[fixedScheduleTarget].fixedGroups = fixedGroups;
+      }
+      if (newName !== oldName) {
+        delete trainerProfiles[oldName];
+        entries.filter((entry) => entry.trainer === oldName).forEach((entry) => { entry.trainer = newName; });
+        entries.filter((entry) => entry.replacementFor === oldName).forEach((entry) => { entry.replacementFor = newName; });
+        (trainerProfiles[newName].additionalProfiles || []).forEach((slot) => {
+          if (trainerProfiles[slot.name]) trainerProfiles[slot.name].owner = newName;
+        });
+        if (fixedScheduleTarget === oldName) fixedScheduleTarget = newName;
+        currentUser = newName;
+      }
+      [newName, ...additionalProfiles(newName)].forEach((trainer) => {
+        const activeScheduleIds = new Set((trainerProfiles[trainer]?.fixedGroups || []).map((schedule) => schedule.id));
+        entries = entries.filter((entry) => {
+          if (entry.trainer !== trainer || !entry.recurringKey || entry.status !== "Concept") return true;
+          const scheduleId = Number(entry.recurringKey.split(":")[0]);
+          return activeScheduleIds.has(scheduleId);
+        });
+      });
+      updateReplacementOptions();
+      profileDialog.close();
+      render();
+      showToast("Je profiel en tarieven zijn bijgewerkt.");
+    });
+
+    document.getElementById("hoursForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const newEntry = {
+        id: nextId++,
+        trainer: document.getElementById("trainerPerson").value,
+        date: formData.get("date"),
+        group: formData.get("group"),
+        hours: Number(formData.get("hours")),
+        role: formData.get("role"),
+        replacementFor: String(formData.get("replacementFor")),
+        status: "Concept"
+      };
+      entries.push(newEntry);
+      event.currentTarget.reset();
+      document.getElementById("date").value = todayString;
+      const entryPeriod = periodForDate(newEntry.date);
+      trainerPeriodSelect.value = entryPeriod.key;
+      document.getElementById("trainerPerson").value = newEntry.trainer;
+      render();
+      showToast("Uren toegevoegd aan je overzicht.");
+    });
+
+    trainerEntries.addEventListener("change", (event) => {
+      const checkbox = event.target.closest('input[data-action="attendance"]');
+      if (!checkbox) return;
+      const entry = entries.find((item) => item.id === Number(checkbox.dataset.entryId));
+      if (!entry || entry.status !== "Concept") return;
+      entry.attended = checkbox.checked;
+      render();
+    });
+
+    document.getElementById("submitPeriod").addEventListener("click", () => {
+      const periodKey = trainerPeriodSelect.value;
+      const selectedTrainer = document.getElementById("trainerPerson").value;
+      const period = periodForDate(`${periodKey}-01`);
+      const drafts = getPeriodEntries(periodKey, selectedTrainer).filter((entry) => entry.status === "Concept" && entry.attended !== false);
+      if (drafts.length === 0) {
+        showToast("Er zijn geen bijgewoonde trainingen in deze periode om in te dienen.");
+        return;
+      }
+      const conflicts = matchingReplacementConflicts(selectedTrainer, periodKey);
+      if (conflicts.length) {
+        showToast("Er is een vervangingsconflict. Bekijk de waarschuwing en los dit eerst op.");
+        document.getElementById("replacementAlerts").scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      const absentCount = getPeriodEntries(periodKey, selectedTrainer).filter((entry) => entry.attended === false && entry.status === "Concept").length;
+      document.getElementById("submitPeriodSummary").textContent =
+        `${periodLabel(period)} · ${drafts.length} bijgewoonde trainingen · ${String(sumHours(drafts)).replace(".", ",")} uur · ${currency.format(sumAmount(drafts))}${absentCount ? ` · ${absentCount} afwezig afgevinkt en niet meegerekend` : ""}`;
+      document.getElementById("confirmReviewed").checked = false;
+      document.getElementById("confirmSubmit").disabled = true;
+      document.getElementById("submitConflictWarning").classList.add("hidden");
+      submitDialog.showModal();
+    });
+
+    document.getElementById("confirmReviewed").addEventListener("change", (event) => {
+      document.getElementById("confirmSubmit").disabled = !event.target.checked;
+    });
+    document.getElementById("cancelSubmit").addEventListener("click", () => submitDialog.close());
+    submitDialog.addEventListener("click", (event) => {
+      if (event.target === submitDialog) submitDialog.close();
+    });
+    document.getElementById("submitConfirmForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!document.getElementById("confirmReviewed").checked) return;
+      const periodKey = trainerPeriodSelect.value;
+      const selectedTrainer = document.getElementById("trainerPerson").value;
+      const conflicts = matchingReplacementConflicts(selectedTrainer, periodKey);
+      const warning = document.getElementById("submitConflictWarning");
+      if (conflicts.length) {
+        warning.innerHTML = `<p class="font-bold">Indienen geblokkeerd: vervangingsconflict</p><ul class="mt-2 list-disc space-y-1 pl-5">${conflicts.map(({ message }) => `<li>${escapeHtml(message)}</li>`).join("")}</ul>`;
+        warning.classList.remove("hidden");
+        document.getElementById("confirmSubmit").disabled = true;
+        return;
+      }
+      const drafts = getPeriodEntries(periodKey, selectedTrainer).filter((entry) => entry.status === "Concept" && entry.attended !== false);
+      if (!drafts.length) {
+        submitDialog.close();
+        showToast("Er zijn geen bijgewoonde trainingen om in te dienen.");
+        return;
+      }
+      drafts.forEach((entry) => { entry.status = "Ingediend"; });
+      const period = periodForDate(`${periodKey}-01`);
+      submitDialog.close();
+      render();
+      showToast(`Je onkostenstaat voor ${periodLabel(period)} is ingediend.`);
+    });
+
+    boardEntries.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const action = button.dataset.action;
+      if (action === "edit") {
+        const entry = entries.find((item) => item.id === Number(button.dataset.id));
+        if (!entry) return;
+        document.getElementById("editId").value = String(entry.id);
+        document.getElementById("editTrainer").textContent = entry.trainer;
+        document.getElementById("editDate").value = entry.date;
+        document.getElementById("editGroup").value = entry.group;
+        document.getElementById("editHours").value = String(entry.hours);
+        document.getElementById("editRole").value = entry.role;
+        document.getElementById("editReplacementFor").value = entry.replacementFor || "";
+        editDialog.showModal();
+        return;
+      }
+
+      const trainer = button.dataset.trainer;
+      const periodKey = button.dataset.period;
+      const items = getPeriodEntries(periodKey, trainer).filter((entry) => entry.status !== "Concept");
+      if (items.length === 0) return;
+      try {
+        createAccountingPdf(trainer, periodKey, items);
+      } catch (error) {
+        console.error("PDF-aanmaak mislukt:", error);
+        showToast(error instanceof Error ? error.message : "De PDF kon niet worden aangemaakt.");
+        return;
+      }
+      if (action === "approve") {
+        items.forEach((entry) => { entry.status = "Goedgekeurd"; });
+        render();
+        showToast(`Periode goedgekeurd. PDF voor ${trainer} gedownload.`);
+      } else {
+        showToast(`PDF voor ${trainer} opnieuw gedownload.`);
+      }
+    });
+
+    document.getElementById("editForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const entry = entries.find((item) => item.id === Number(formData.get("id")));
+      if (!entry) return;
+      const trainer = entry.trainer;
+      const previousPeriod = periodForDate(entry.date).key;
+      const wasApproved = entry.status === "Goedgekeurd";
+      entry.date = formData.get("date");
+      entry.group = formData.get("group");
+      entry.hours = Number(formData.get("hours"));
+      entry.role = formData.get("role");
+      entry.replacementFor = String(formData.get("replacementFor"));
+      if (wasApproved) {
+        entry.status = "Ingediend";
+        const updatedPeriod = periodForDate(entry.date).key;
+        entries.filter((item) => item.trainer === trainer
+          && (periodForDate(item.date).key === previousPeriod || periodForDate(item.date).key === updatedPeriod)
+          && item.status === "Goedgekeurd")
+          .forEach((item) => { item.status = "Ingediend"; });
+      }
+      editDialog.close();
+      render();
+      showToast("Wijzigingen opgeslagen.");
+    });
+
+    document.getElementById("closeEdit").addEventListener("click", () => editDialog.close());
+    document.getElementById("cancelEdit").addEventListener("click", () => editDialog.close());
+    editDialog.addEventListener("click", (event) => {
+      if (event.target === editDialog) editDialog.close();
+    });
+
+    render();
+  </script>
+</body>
+</html>
