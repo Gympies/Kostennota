@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f7f5">
-  <title>De Gympies - Urenregistratie</title>
+  <title>De Gympies Keerbergen - Urenregistratie</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
   <style>
@@ -26,10 +26,10 @@
 <body class="min-h-screen text-slate-800 antialiased">
   <header class="sticky top-0 z-20 border-b border-slate-200/80 bg-white/95 backdrop-blur">
     <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-      <a href="#" class="flex min-w-0 items-center gap-3" aria-label="De Gympies startpagina">
+      <a href="#" class="flex min-w-0 items-center gap-3" aria-label="De Gympies Keerbergen startpagina">
         <img id="clubLogo" src="Gympies%20logo.jpg" alt="De Gympies Keerbergen" class="h-11 w-11 rounded-xl border border-slate-200 bg-white object-contain p-0.5">
         <span class="min-w-0">
-          <span class="block truncate text-sm font-bold tracking-tight text-slate-900 sm:text-base">De Gympies</span>
+          <span class="block truncate text-sm font-bold tracking-tight text-slate-900 sm:text-base">De Gympies Keerbergen</span>
           <span class="block text-xs text-slate-500">Urenregistratie</span>
         </span>
       </a>
@@ -142,6 +142,7 @@
             <span id="monthAmount" class="text-xs font-semibold text-teal-800"></span>
           </div>
           <div id="trainerEntries" class="space-y-3" aria-live="polite"></div>
+          <div id="trainerLimitAlerts" class="mt-4 space-y-2" aria-live="polite"></div>
           <div id="emptyHistory" class="hidden rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-9 text-center">
             <span class="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-full bg-slate-100 text-slate-500" aria-hidden="true">
               <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="5" width="16" height="15" rx="2"/><path stroke-linecap="round" d="M8 3v4m8-4v4M4 10h16"/></svg>
@@ -187,6 +188,9 @@
           <h2 id="additionalTrainersHeading" class="font-bold text-slate-900">Extra officiële lesgevers</h2>
           <p class="mt-1 text-xs leading-5 text-slate-500">Bestuur activeert maximaal twee aparte profielen per trainer. Registreer alleen uren van personen die de les effectief hebben gegeven; elke lesgever dient apart in en krijgt een aparte goedkeuring en PDF. Deze demo controleert geen wettelijke dag- of jaarmaxima; controleer die maxima afzonderlijk.</p>
         </div>
+        <label for="additionalTrainerOwner" class="mb-3 block text-xs font-semibold text-slate-600">Koppel extra lesgevers aan trainer
+          <select id="additionalTrainerOwner" class="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-800 sm:max-w-sm"></select>
+        </label>
         <div id="additionalTrainerSlots" class="grid gap-3 sm:grid-cols-2"></div>
         <button id="saveAdditionalTrainers" type="button" class="mt-3 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white hover:bg-slate-800">Profielen opslaan</button>
       </section>
@@ -202,12 +206,33 @@
         <p class="text-sm font-semibold text-slate-700">Geen ingediende onkosten in deze periode</p>
         <p class="mt-1 text-sm text-slate-500">Ingediende trainers verschijnen hier voor goedkeuring.</p>
       </div>
+      <form id="legalLimitsForm" class="hidden mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div class="mb-4">
+          <p class="text-xs leading-5 text-slate-500">Stel het maximum per lesdag en per kalenderjaar in. Een dagmaximum wordt geblokkeerd; bij het jaarmaximum krijgt de trainer een prognosewaarschuwing. Na opslaan kan dit kalenderjaar niet opnieuw worden aangepast.</p>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-3">
+          <label class="text-xs font-semibold text-slate-600">Kalenderjaar
+            <input id="legalLimitYear" type="number" min="2000" max="2100" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+          </label>
+          <label class="text-xs font-semibold text-slate-600">Maximum per dag (€)
+            <input id="dailyLimit" type="number" min="0" step="0.01" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+          </label>
+          <label class="text-xs font-semibold text-slate-600">Maximum per kalenderjaar (€)
+            <input id="annualLimit" type="number" min="0" step="0.01" required class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+          </label>
+        </div>
+        <button type="submit" class="mt-3 rounded-xl bg-teal-700 px-4 py-2.5 text-xs font-bold text-white hover:bg-teal-800">Maxima opslaan</button>
+        <p id="legalLimitsSaved" class="mt-2 text-xs text-slate-500" aria-live="polite"></p>
+      </form>
+      <div class="mt-6 flex justify-end">
+        <button id="toggleLegalLimits" type="button" aria-expanded="false" aria-controls="legalLimitsForm" class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-500 transition hover:border-slate-300 hover:text-slate-700">Wettelijke maxima <span id="legalLimitsToggleLabel">instellen</span></button>
+      </div>
       </div>
       <section id="boardDashboardPanel" class="hidden" role="tabpanel" aria-labelledby="dashboardTab">
         <div class="mb-5 flex flex-wrap items-end justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div>
             <h2 class="font-bold text-slate-900">Registraties en kostennota-status</h2>
-            <p class="mt-1 text-xs text-slate-500">Maandbedragen zijn gebaseerd op alle bijgewoonde uren; de notastatus geldt voor de volledige tweemaandsperiode van de gekozen maand.</p>
+            <p class="mt-1 text-xs text-slate-500">Maandbedragen zijn gebaseerd op alle gegeven uren; de notastatus geldt voor de volledige tweemaandsperiode van de gekozen maand.</p>
           </div>
           <div class="grid w-full grid-cols-2 gap-2 sm:w-auto sm:grid-cols-4">
             <label class="text-xs font-semibold text-slate-500">Maand<select id="dashboardMonth" aria-label="Filter op maand" class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-800"></select></label>
@@ -291,6 +316,7 @@
           <div><label for="profilePhone" class="mb-1.5 block text-sm font-semibold text-slate-700">Telefoon</label><input id="profilePhone" name="phone" type="tel" maxlength="30" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
         </div>
         <div><label for="profileAddress" class="mb-1.5 block text-sm font-semibold text-slate-700">Adres</label><input id="profileAddress" name="address" maxlength="140" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
+        <div><label for="profileBirthDate" class="mb-1.5 block text-sm font-semibold text-slate-700">Geboortedatum</label><input id="profileBirthDate" name="birthDate" type="date" max="2100-12-31" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"><p class="mt-1 text-xs text-slate-500">Vul dit in om te controleren of de trainer minstens 16 jaar is en een kostennota mag indienen.</p></div>
         <div class="grid gap-3 sm:grid-cols-2">
           <div><label for="profileNationalNumber" class="mb-1.5 block text-sm font-semibold text-slate-700">Rijksregisternummer</label><input id="profileNationalNumber" name="nationalNumber" inputmode="numeric" autocomplete="off" placeholder="00.00.00-000.00 (fictief)" maxlength="20" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
           <div><label for="profileBankAccount" class="mb-1.5 block text-sm font-semibold text-slate-700">Rekeningnummer (IBAN)</label><input id="profileBankAccount" name="bankAccount" autocomplete="off" placeholder="BE00 0000 0000 0000 (fictief)" maxlength="34" class="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm focus:border-teal-600 focus:outline-none"></div>
@@ -333,6 +359,7 @@
         <p id="submitPeriodSummary" class="mt-2 text-sm text-slate-600"></p>
       </div>
       <div id="submitConflictWarning" class="mb-4 hidden rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900" role="alert"></div>
+      <div id="submitPeriodBreakdown" class="mb-4 space-y-3" aria-label="Maandelijkse berekening per type"></div>
       <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-950">
         Controleer voor je indient of alle trainingen, aanwezigheden, vervangingen en uren kloppen. Afgevinkte afwezigheden worden niet op de onkostenstaat gezet.
       </div>
@@ -399,11 +426,11 @@
 
     let currentUser = "Noor Vandenberg";
     let trainerProfiles = {
-      "Noor Vandenberg": { email: "noor.vandenberg@example.com", phone: "000 00 00 00", address: "Demo straat 1, 0000 Demo", nationalNumber: "00.00.00-000.00", bankAccount: "BE00 0000 0000 0000", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 1, group: "K12za11u10", weekday: 6, hours: 1, role: "REC HOOFD" }], additionalProfiles: [{ name: "Emma De Smet", enabled: true }, { name: "Bram Jacobs", enabled: false }] },
-      "Lotte Peeters": { email: "lotte.peeters@example.com", phone: "", address: "Voorbeeldlaan 12, 0000 Testdorp", nationalNumber: "00.00.00-000.01", bankAccount: "BE00 0000 0000 0001", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
-      "Milan Vermeulen": { email: "milan.vermeulen@example.com", phone: "", address: "Fictiestraat 3, 0000 Voorbeeld", nationalNumber: "00.00.00-000.02", bankAccount: "BE00 0000 0000 0002", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
-      "Emma De Smet": { email: "emma.desmet@example.com", phone: "", address: "Demoweg 8, 0000 Testdorp", nationalNumber: "00.00.00-000.03", bankAccount: "BE00 0000 0000 0003", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 101, group: "G-gym jeugd", weekday: 6, hours: 1, role: "REC HULP" }], owner: "Noor Vandenberg", isAdditional: true, enabled: true },
-      "Bram Jacobs": { email: "bram.jacobs@example.com", phone: "", address: "Fictielaan 5, 0000 Voorbeeld", nationalNumber: "00.00.00-000.04", bankAccount: "BE00 0000 0000 0004", rateHelp: 8, rateHead: 14, fixedGroups: [], owner: "Noor Vandenberg", isAdditional: true, enabled: false }
+      "Noor Vandenberg": { email: "noor.vandenberg@example.com", phone: "000 00 00 00", address: "Demo straat 1, 0000 Demo", birthDate: "2000-04-12", nationalNumber: "00.00.00-000.00", bankAccount: "BE00 0000 0000 0000", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 1, group: "K12za11u10", weekday: 6, hours: 1, role: "REC HOOFD" }], additionalProfiles: [{ name: "Emma De Smet", enabled: true }, { name: "Bram Jacobs", enabled: false }] },
+      "Lotte Peeters": { email: "lotte.peeters@example.com", phone: "", address: "Voorbeeldlaan 12, 0000 Testdorp", birthDate: "1998-07-23", nationalNumber: "00.00.00-000.01", bankAccount: "BE00 0000 0000 0001", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
+      "Milan Vermeulen": { email: "milan.vermeulen@example.com", phone: "", address: "Fictiestraat 3, 0000 Voorbeeld", birthDate: "2001-02-05", nationalNumber: "00.00.00-000.02", bankAccount: "BE00 0000 0000 0002", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
+      "Emma De Smet": { email: "emma.desmet@example.com", phone: "", address: "Demoweg 8, 0000 Testdorp", birthDate: "2005-06-30", nationalNumber: "00.00.00-000.03", bankAccount: "BE00 0000 0000 0003", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 101, group: "G-gym jeugd", weekday: 6, hours: 1, role: "REC HULP" }], owner: "Noor Vandenberg", isAdditional: true, enabled: true },
+      "Bram Jacobs": { email: "bram.jacobs@example.com", phone: "", address: "Fictielaan 5, 0000 Voorbeeld", birthDate: "", nationalNumber: "00.00.00-000.04", bankAccount: "BE00 0000 0000 0004", rateHelp: 8, rateHead: 14, fixedGroups: [], owner: "Noor Vandenberg", isAdditional: true, enabled: false }
     };
     const todayString = isoDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
     let entries = [
@@ -419,6 +446,11 @@
     let nextId = Math.max(...entries.map((entry) => entry.id)) + 1;
     let nextFixedGroupId = 2;
     let toastTimeout;
+    const defaultLegalLimits = { daily: 42.31, annual: 3108.44 };
+    const legalLimitsByYear = {
+      2026: { ...defaultLegalLimits }
+    };
+    const savedLegalLimitYears = new Set();
 
     const trainerView = document.getElementById("trainerView");
     const boardView = document.getElementById("boardView");
@@ -630,12 +662,141 @@
       return Number(entry.hours) * rateForEntry(entry, entry.trainer);
     }
 
+    function trainerAgeStatus(trainer, onDate = today) {
+      const birthDate = trainerProfiles[trainer]?.birthDate;
+      if (!birthDate) return { eligible: false, age: null, reason: "Voeg je geboortedatum toe in je profiel om te controleren of je minstens 16 jaar bent." };
+      const birth = new Date(`${birthDate}T12:00:00`);
+      if (Number.isNaN(birth.getTime()) || birth > onDate) {
+        return { eligible: false, age: null, reason: "De geboortedatum in je profiel is ongeldig. Pas die aan voor je indient." };
+      }
+      let age = onDate.getFullYear() - birth.getFullYear();
+      if (onDate.getMonth() < birth.getMonth()
+        || (onDate.getMonth() === birth.getMonth() && onDate.getDate() < birth.getDate())) age -= 1;
+      return age >= 16
+        ? { eligible: true, age, reason: "" }
+        : { eligible: false, age, reason: "Je moet minstens 16 jaar zijn om een kostennota in te dienen." };
+    }
+
+    function legalLimitsForYear(year) {
+      return legalLimitsByYear[year] || defaultLegalLimits;
+    }
+
+    function dailyLimitViolations(items) {
+      const totalsByDate = new Map();
+      items.filter((entry) => entry.attended !== false).forEach((entry) => {
+        totalsByDate.set(entry.date, (totalsByDate.get(entry.date) || 0) + amountForEntry(entry));
+      });
+      return [...totalsByDate.entries()]
+        .filter(([date, amount]) => amount > legalLimitsForYear(Number(date.slice(0, 4))).daily)
+        .map(([date, amount]) => ({ date, amount, limit: legalLimitsForYear(Number(date.slice(0, 4))).daily }));
+    }
+
+    function annualCompensationForecast(trainer) {
+      const year = today.getFullYear();
+      const profile = trainerProfiles[trainer] || {};
+      const yearEntries = entries.filter((entry) => entry.trainer === trainer
+        && Number(entry.date.slice(0, 4)) === year
+        && entry.date <= todayString
+        && entry.attended !== false);
+      const actual = sumAmount(yearEntries);
+      const isCompetitionTrainer = (profile.fixedGroups || []).some((schedule) =>
+        schedule.role.includes("COMP") || schedule.group.toLocaleLowerCase("nl-BE").includes("comp"))
+        || yearEntries.some((entry) => entry.role.includes("COMP") || entry.group.toLocaleLowerCase("nl-BE").includes("comp"));
+      const isCampTrainer = (profile.fixedGroups || []).some((schedule) =>
+        schedule.group.toLocaleLowerCase("nl-BE").includes("kamp"))
+        || yearEntries.some((entry) => entry.group.toLocaleLowerCase("nl-BE").includes("kamp"));
+      const activeMonth = (month) => month !== 7 && month !== 8
+        || (month === 7 && isCampTrainer)
+        || (month === 8 && (isCampTrainer || isCompetitionTrainer));
+      const monthAmounts = new Map();
+      yearEntries.forEach((entry) => {
+        const month = Number(entry.date.slice(5, 7));
+        monthAmounts.set(month, (monthAmounts.get(month) || 0) + amountForEntry(entry));
+      });
+      const recentAmounts = [...monthAmounts.entries()]
+        .filter(([month, amount]) => month <= today.getMonth() + 1 && activeMonth(month) && amount > 0)
+        .sort(([monthA], [monthB]) => monthB - monthA)
+        .slice(0, 3)
+        .map(([, amount]) => amount);
+      const futureActiveMonths = Array.from(
+        { length: Math.max(0, 12 - (today.getMonth() + 1)) },
+        (_, index) => today.getMonth() + 2 + index
+      ).filter(activeMonth);
+      const monthlyAverage = recentAmounts.length
+        ? recentAmounts.reduce((total, amount) => total + amount, 0) / recentAmounts.length
+        : 0;
+      return {
+        year,
+        actual,
+        projected: actual + monthlyAverage * futureActiveMonths.length,
+        futureActiveMonths: futureActiveMonths.length,
+        limit: legalLimitsForYear(year).annual
+      };
+    }
+
+    function syncLegalLimitInputs() {
+      const year = Number(document.getElementById("legalLimitYear").value);
+      const limits = legalLimitsForYear(year);
+      const alreadySaved = savedLegalLimitYears.has(year);
+      document.getElementById("dailyLimit").value = limits.daily.toFixed(2);
+      document.getElementById("annualLimit").value = limits.annual.toFixed(2);
+      document.getElementById("dailyLimit").disabled = alreadySaved;
+      document.getElementById("annualLimit").disabled = alreadySaved;
+      document.querySelector("#legalLimitsForm button[type=submit]").disabled = alreadySaved;
+      document.querySelector("#legalLimitsForm button[type=submit]").classList.toggle("opacity-50", alreadySaved);
+      document.getElementById("legalLimitsSaved").textContent = alreadySaved
+        ? `De maxima voor ${year} zijn al ingesteld en kunnen dit jaar niet opnieuw worden gewijzigd.`
+        : `Nog niet ingesteld voor ${year}; standaardwaarden zijn ingevuld.`;
+    }
+
+    function loadSavedLegalLimits() {
+      try {
+        const saved = localStorage.getItem("gympies-legal-limits");
+        if (!saved) return;
+        const parsed = JSON.parse(saved);
+        if (!parsed || typeof parsed !== "object" || !parsed.byYear || typeof parsed.byYear !== "object") {
+          throw new Error("Ongeldig formaat in opgeslagen maxima.");
+        }
+        Object.entries(parsed.byYear).forEach(([yearText, limits]) => {
+          const year = Number(yearText);
+          if (!Number.isInteger(year) || year < 2000 || year > 2100
+            || !Number.isFinite(limits?.daily) || limits.daily < 0
+            || !Number.isFinite(limits?.annual) || limits.annual < 0) {
+            throw new Error(`Ongeldige maximuminstelling voor ${yearText}.`);
+          }
+          legalLimitsByYear[year] = { daily: limits.daily, annual: limits.annual };
+          savedLegalLimitYears.add(year);
+        });
+      } catch (error) {
+        console.error("Opgeslagen wettelijke maxima konden niet worden geladen:", error);
+        showToast("Opgeslagen maxima konden niet worden gelezen. De demo gebruikt de standaardbedragen; controleer de browseropslag.");
+      }
+    }
+
     function sumHours(items) {
       return items.filter((entry) => entry.attended !== false).reduce((total, entry) => total + Number(entry.hours), 0);
     }
 
     function sumAmount(items) {
       return items.filter((entry) => entry.attended !== false).reduce((total, entry) => total + amountForEntry(entry), 0);
+    }
+
+    function renderSubmissionBreakdown(items, period) {
+      return periodMonths(period).map((month) => {
+        const monthly = monthEntriesFor(items, month).filter((entry) => entry.attended !== false);
+        const groups = [
+          { label: "Hoofd", entries: monthly.filter((entry) => !entry.role.includes("HULP")) },
+          { label: "Hulp", entries: monthly.filter((entry) => entry.role.includes("HULP")) }
+        ].filter(({ entries: roleEntries }) => roleEntries.length > 0);
+        const roleRows = groups.map(({ label, entries: roleEntries }) =>
+          `<div class="flex items-center justify-between gap-3 py-1 text-xs text-slate-700"><span>${label}</span><span class="text-right">${String(sumHours(roleEntries)).replace(".", ",")} u · ${escapeHtml(currency.format(sumAmount(roleEntries)))}</span></div>`
+        ).join("");
+        return `<section class="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+          <h3 class="text-xs font-bold capitalize text-slate-800">${escapeHtml(allMonths.format(month))}</h3>
+          ${roleRows || `<p class="py-1 text-xs text-slate-500">Geen trainingen gegeven</p>`}
+          <div class="mt-1 flex items-center justify-between border-t border-slate-100 pt-2 text-xs font-bold text-slate-900"><span>Maandtotaal</span><span>${escapeHtml(currency.format(sumAmount(monthly)))}</span></div>
+        </section>`;
+      }).join("");
     }
 
     function monthEntriesFor(items, date) {
@@ -695,11 +856,27 @@
       document.getElementById("monthAmount").textContent = `${String(sumHours(items)).replace(".", ",")} uur · ${currency.format(sumAmount(items))}`;
       trainerEntries.innerHTML = items.map((entry) => `
         <article class="entry-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-          ${entry.recurringKey && entry.status === "Concept" ? `<label class="mb-3 flex items-center gap-2 rounded-lg bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-900"><input type="checkbox" data-action="attendance" data-entry-id="${entry.id}" ${entry.attended !== false ? "checked" : ""} class="h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600"><span>Training bijgewoond · vink uit als je afwezig was</span></label>` : ""}
+          ${entry.recurringKey && entry.status === "Concept" ? `<label class="mb-3 flex items-center gap-2 rounded-lg bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-900"><input type="checkbox" data-action="attendance" data-entry-id="${entry.id}" ${entry.attended !== false ? "checked" : ""} class="h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600"><span>Training gegeven · vink uit als je afwezig was</span></label>` : ""}
           ${entryDetails(entry)}
         </article>`).join("");
       document.getElementById("emptyHistory").classList.toggle("hidden", items.length > 0);
       document.getElementById("currentMonth").textContent = periodLabel(period);
+      const dailyViolations = dailyLimitViolations(items);
+      const forecast = annualCompensationForecast(selectedTrainer);
+      const limitAlerts = [];
+      const ageStatus = trainerAgeStatus(selectedTrainer);
+      if (!ageStatus.eligible) {
+        limitAlerts.push(`<div class="rounded-xl border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900" role="alert"><p class="font-bold">Kostennota indienen niet mogelijk</p><p class="mt-1">${escapeHtml(ageStatus.reason)}</p></div>`);
+      }
+      if (dailyViolations.length) {
+        limitAlerts.push(`<div class="rounded-xl border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900" role="alert"><p class="font-bold">Dagmaximum overschreden</p><ul class="mt-1 list-disc pl-5">${dailyViolations.map(({ date, amount, limit }) => `<li>${escapeHtml(displayDate(date))}: ${escapeHtml(currency.format(amount))} geregistreerd, maximum ${escapeHtml(currency.format(limit))}.</li>`).join("")}</ul>Pas de uren aan; deze dagen kunnen niet worden ingediend.</div>`);
+      }
+      if (forecast.actual > forecast.limit) {
+        limitAlerts.push(`<div class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900" role="alert"><p class="font-bold">Jaarmaximum bereikt of overschreden</p><p class="mt-1">${escapeHtml(currency.format(forecast.actual))} geregistreerd in ${forecast.year}; maximum ${escapeHtml(currency.format(forecast.limit))}.</p></div>`);
+      } else if (forecast.futureActiveMonths > 0 && forecast.projected > forecast.limit) {
+        limitAlerts.push(`<div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950" role="status"><p class="font-bold">Prognose: mogelijk boven het jaarmaximum</p><p class="mt-1">Op basis van gemiddeld ${escapeHtml(currency.format(forecast.actual && forecast.futureActiveMonths ? (forecast.projected - forecast.actual) / forecast.futureActiveMonths : 0))} per actieve maand wordt ongeveer ${escapeHtml(currency.format(forecast.projected))} verwacht in ${forecast.year}; maximum ${escapeHtml(currency.format(forecast.limit))}.</p><p class="mt-1 text-xs">De prognose houdt rekening met minder activiteit in juli en augustus; augustus telt mee voor COMP-trainers en zomermaanden ook voor geregistreerde kampen.</p></div>`);
+      }
+      document.getElementById("trainerLimitAlerts").innerHTML = limitAlerts.join("");
       const conflicts = getReplacementConflicts(selectedTrainer, periodKey);
       const replacementAlerts = document.getElementById("replacementAlerts");
       replacementAlerts.classList.toggle("hidden", conflicts.length === 0);
@@ -871,6 +1048,7 @@
       const periodKey = boardPeriodSelect.value;
       const period = periodForDate(`${periodKey}-01`);
       const trainers = groupedSubmitted(periodKey);
+      syncLegalLimitInputs();
       renderAdditionalTrainerSlots();
       boardEntries.innerHTML = trainers.map(({ trainer, items }, index) => {
         const approved = items.every((entry) => entry.status === "Goedgekeurd");
@@ -915,7 +1093,15 @@
     }
 
     function renderAdditionalTrainerSlots() {
-      const slots = trainerProfiles[currentUser].additionalProfiles || [];
+      const ownerSelect = document.getElementById("additionalTrainerOwner");
+      const availableOwners = Object.keys(trainerProfiles).filter((name) => !trainerProfiles[name].isAdditional)
+        .sort((a, b) => a.localeCompare(b));
+      const selectedOwner = availableOwners.includes(ownerSelect.value) ? ownerSelect.value : currentUser;
+      ownerSelect.innerHTML = availableOwners.map((name) =>
+        `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
+      ownerSelect.value = availableOwners.includes(selectedOwner) ? selectedOwner : availableOwners[0];
+      const owner = ownerSelect.value;
+      const slots = trainerProfiles[owner]?.additionalProfiles || [];
       document.getElementById("additionalTrainerSlots").innerHTML = [0, 1].map((index) => {
         const slot = slots[index] || { name: "", enabled: false };
         const profile = trainerProfiles[slot.name] || { rateHelp: 8, rateHead: 14 };
@@ -935,7 +1121,12 @@
     }
 
     function saveAdditionalTrainerSlots() {
-      const parent = trainerProfiles[currentUser];
+      const owner = document.getElementById("additionalTrainerOwner").value;
+      const parent = trainerProfiles[owner];
+      if (!parent || parent.isAdditional) {
+        showToast("Selecteer een geldige hoofdtrainer voor de extra profielen.");
+        return;
+      }
       const oldSlots = parent.additionalProfiles || [];
       const nextSlots = [0, 1].map((index) => ({
         oldName: oldSlots[index]?.name || "",
@@ -970,7 +1161,7 @@
       const updatedSlots = nextSlots.map(({ oldName, name, enabled, rateHelp, rateHead }) => {
         if (oldName && oldName !== name && trainerProfiles[oldName]?.isAdditional) {
           const oldProfile = trainerProfiles[oldName];
-          if (name && !trainerProfiles[name]) trainerProfiles[name] = { ...oldProfile, owner: currentUser };
+          if (name && !trainerProfiles[name]) trainerProfiles[name] = { ...oldProfile, owner };
           else if (!name) delete trainerProfiles[oldName];
           if (name) {
             entries.filter((entry) => entry.trainer === oldName).forEach((entry) => { entry.trainer = name; });
@@ -979,10 +1170,10 @@
           }
         }
         if (name && !trainerProfiles[name]) {
-          trainerProfiles[name] = { email: "", phone: "", address: "", rateHelp: 8, rateHead: 14, fixedGroups: [], owner: currentUser, isAdditional: true };
+          trainerProfiles[name] = { email: "", phone: "", address: "", nationalNumber: "", bankAccount: "", rateHelp: 8, rateHead: 14, fixedGroups: [], owner, isAdditional: true };
         }
         if (name && trainerProfiles[name]) {
-          trainerProfiles[name].owner = currentUser;
+          trainerProfiles[name].owner = owner;
           trainerProfiles[name].isAdditional = true;
           trainerProfiles[name].enabled = enabled;
           trainerProfiles[name].rateHelp = rateHelp;
@@ -991,6 +1182,7 @@
         return name ? { name, enabled, rateHelp, rateHead } : null;
       }).filter(Boolean);
       parent.additionalProfiles = updatedSlots;
+      renderAdditionalTrainerSlots();
       updateReplacementOptions();
       render();
       showToast("Extra lesgeverprofielen bijgewerkt.");
@@ -1047,6 +1239,7 @@
       document.getElementById("profileEmail").value = profile.email || "";
       document.getElementById("profilePhone").value = profile.phone || "";
       document.getElementById("profileAddress").value = profile.address || "";
+      document.getElementById("profileBirthDate").value = profile.birthDate || "";
       document.getElementById("profileNationalNumber").value = profile.nationalNumber || "";
       document.getElementById("profileBankAccount").value = profile.bankAccount || "";
       document.getElementById("rateHelp").value = profile.rateHelp;
@@ -1110,7 +1303,7 @@
         pdf.text(String(text), 18, y);
         y += size * 0.55 + 3;
       };
-      line("De Gympies - Onkostenstaat", 18, true);
+      line("De Gympies Keerbergen - Onkostenstaat", 18, true);
       line(`Periode: ${periodLabel(period)}`, 12, true);
       line(`Trainer: ${trainer}`, 11);
       if (profile.email) line(`E-mail: ${profile.email}`);
@@ -1166,10 +1359,53 @@
       }
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(9);
-      pdf.text(`Goedgekeurd op ${displayDate(todayString)} - De Gympies`, 18, y);
+      pdf.text(`Goedgekeurd op ${displayDate(todayString)} - De Gympies Keerbergen`, 18, y);
       const fileName = `onkostenstaat-${trainer.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${periodKey}.pdf`;
       pdf.save(fileName);
     }
+
+    document.getElementById("legalLimitYear").value = String(today.getFullYear());
+    document.getElementById("legalLimitYear").addEventListener("change", syncLegalLimitInputs);
+    document.getElementById("toggleLegalLimits").addEventListener("click", (event) => {
+      const content = document.getElementById("legalLimitsForm");
+      const expanded = event.currentTarget.getAttribute("aria-expanded") === "true";
+      event.currentTarget.setAttribute("aria-expanded", String(!expanded));
+      content.classList.toggle("hidden", expanded);
+      document.getElementById("legalLimitsToggleLabel").textContent = expanded ? "Instellen" : "Sluiten";
+      if (!expanded) syncLegalLimitInputs();
+    });
+    document.getElementById("legalLimitsForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const year = Number(document.getElementById("legalLimitYear").value);
+      const daily = Number(document.getElementById("dailyLimit").value);
+      const annual = Number(document.getElementById("annualLimit").value);
+      if (!Number.isInteger(year) || year < 2000 || year > 2100
+        || !Number.isFinite(daily) || daily < 0
+        || !Number.isFinite(annual) || annual < 0) {
+        showToast("Vul een geldig kalenderjaar en niet-negatieve maximumbedragen in.");
+        return;
+      }
+      if (savedLegalLimitYears.has(year)) {
+        syncLegalLimitInputs();
+        showToast(`De maxima voor ${year} zijn al ingesteld en kunnen niet opnieuw worden opgeslagen.`);
+        return;
+      }
+      const persisted = Object.fromEntries([...savedLegalLimitYears]
+        .map((savedYear) => [savedYear, legalLimitsByYear[savedYear]]));
+      persisted[year] = { daily, annual };
+      try {
+        localStorage.setItem("gympies-legal-limits", JSON.stringify({ byYear: persisted }));
+      } catch (error) {
+        console.error("Wettelijke maxima konden niet worden opgeslagen:", error);
+        showToast("De maxima konden niet lokaal worden opgeslagen. Controleer de browseropslag en probeer opnieuw.");
+        return;
+      }
+      legalLimitsByYear[year] = { daily, annual };
+      savedLegalLimitYears.add(year);
+      syncLegalLimitInputs();
+      render();
+      showToast(`Wettelijke maxima voor ${year} bijgewerkt.`);
+    });
 
     trainerTab.addEventListener("click", () => setView("trainer"));
     boardTab.addEventListener("click", () => setView("board"));
@@ -1201,8 +1437,10 @@
       renderDashboard();
       document.getElementById("dashboardTrainerList").scrollIntoView({ behavior: "smooth", block: "start" });
     });
-    document.getElementById("profileButton").addEventListener("click", openProfile);
-    document.getElementById("mobileProfileButton").addEventListener("click", openProfile);
+    document.getElementById("profileButton").addEventListener("click", () =>
+      openProfile(document.getElementById("trainerPerson").value || currentUser));
+    document.getElementById("mobileProfileButton").addEventListener("click", () =>
+      openProfile(document.getElementById("trainerPerson").value || currentUser));
     document.getElementById("trainerPerson").addEventListener("change", (event) => {
       const selected = event.target.value;
       document.getElementById("replacementFor").value = "";
@@ -1215,6 +1453,7 @@
       renderFixedGroups(trainerProfiles[fixedScheduleTarget]?.fixedGroups || []);
     });
     document.getElementById("saveAdditionalTrainers").addEventListener("click", saveAdditionalTrainerSlots);
+    document.getElementById("additionalTrainerOwner").addEventListener("change", renderAdditionalTrainerSlots);
     document.getElementById("closeProfile").addEventListener("click", () => profileDialog.close());
     document.getElementById("cancelProfile").addEventListener("click", () => profileDialog.close());
     profileDialog.addEventListener("click", (event) => {
@@ -1262,6 +1501,7 @@
         email: String(formData.get("email")).trim(),
         phone: String(formData.get("phone")).trim(),
         address: String(formData.get("address")).trim(),
+        birthDate: String(formData.get("birthDate")).trim(),
         nationalNumber: String(formData.get("nationalNumber")).trim(),
         bankAccount: String(formData.get("bankAccount")).trim(),
         rateHelp: Number(formData.get("rateHelp")),
@@ -1314,13 +1554,22 @@
       const newEntry = {
         id: nextId++,
         trainer: document.getElementById("trainerPerson").value,
-        date: formData.get("date"),
+        date: String(formData.get("date")),
         group: formData.get("group"),
         hours: Number(formData.get("hours")),
         role: formData.get("role"),
         replacementFor: String(formData.get("replacementFor")),
         status: "Concept"
       };
+      const existingDayAmount = entries
+        .filter((entry) => entry.trainer === newEntry.trainer && entry.date === newEntry.date && entry.attended !== false)
+        .reduce((total, entry) => total + amountForEntry(entry), 0);
+      const dailyLimit = legalLimitsForYear(Number(newEntry.date.slice(0, 4))).daily;
+      const newDayAmount = existingDayAmount + amountForEntry(newEntry);
+      if (newDayAmount > dailyLimit) {
+        showToast(`Toevoegen geblokkeerd: ${displayDate(newEntry.date)} komt op ${currency.format(newDayAmount)}, boven het dagmaximum van ${currency.format(dailyLimit)}.`);
+        return;
+      }
       entries.push(newEntry);
       event.currentTarget.reset();
       document.getElementById("date").value = todayString;
@@ -1344,9 +1593,21 @@
       const periodKey = trainerPeriodSelect.value;
       const selectedTrainer = document.getElementById("trainerPerson").value;
       const period = periodForDate(`${periodKey}-01`);
+      const ageStatus = trainerAgeStatus(selectedTrainer);
+      if (!ageStatus.eligible) {
+        showToast(ageStatus.reason);
+        document.getElementById("trainerLimitAlerts").scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
       const drafts = getPeriodEntries(periodKey, selectedTrainer).filter((entry) => entry.status === "Concept" && entry.attended !== false);
       if (drafts.length === 0) {
-        showToast("Er zijn geen bijgewoonde trainingen in deze periode om in te dienen.");
+        showToast("Er zijn geen trainingen gegeven in deze periode om in te dienen.");
+        return;
+      }
+      const dailyViolations = dailyLimitViolations(getPeriodEntries(periodKey, selectedTrainer));
+      if (dailyViolations.length) {
+        showToast("Indienen geblokkeerd: minstens één dag overschrijdt het ingestelde dagmaximum.");
+        document.getElementById("trainerLimitAlerts").scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
       const conflicts = matchingReplacementConflicts(selectedTrainer, periodKey);
@@ -1357,7 +1618,8 @@
       }
       const absentCount = getPeriodEntries(periodKey, selectedTrainer).filter((entry) => entry.attended === false && entry.status === "Concept").length;
       document.getElementById("submitPeriodSummary").textContent =
-        `${periodLabel(period)} · ${drafts.length} bijgewoonde trainingen · ${String(sumHours(drafts)).replace(".", ",")} uur · ${currency.format(sumAmount(drafts))}${absentCount ? ` · ${absentCount} afwezig afgevinkt en niet meegerekend` : ""}`;
+        `${periodLabel(period)} · ${drafts.length} trainingen gegeven · ${String(sumHours(drafts)).replace(".", ",")} uur · ${currency.format(sumAmount(drafts))}${absentCount ? ` · ${absentCount} afwezig afgevinkt en niet meegerekend` : ""}`;
+      document.getElementById("submitPeriodBreakdown").innerHTML = renderSubmissionBreakdown(drafts, period);
       document.getElementById("confirmReviewed").checked = false;
       clearSignature();
       updateSubmitButton();
@@ -1380,6 +1642,12 @@
       }
       const periodKey = trainerPeriodSelect.value;
       const selectedTrainer = document.getElementById("trainerPerson").value;
+      const ageStatus = trainerAgeStatus(selectedTrainer);
+      if (!ageStatus.eligible) {
+        submitDialog.close();
+        showToast(ageStatus.reason);
+        return;
+      }
       const conflicts = matchingReplacementConflicts(selectedTrainer, periodKey);
       const warning = document.getElementById("submitConflictWarning");
       if (conflicts.length) {
@@ -1391,7 +1659,7 @@
       const drafts = getPeriodEntries(periodKey, selectedTrainer).filter((entry) => entry.status === "Concept" && entry.attended !== false);
       if (!drafts.length) {
         submitDialog.close();
-        showToast("Er zijn geen bijgewoonde trainingen om in te dienen.");
+        showToast("Er zijn geen trainingen gegeven om in te dienen.");
         return;
       }
       drafts.forEach((entry) => { entry.status = "Ingediend"; });
@@ -1479,6 +1747,7 @@
       if (event.target === editDialog) editDialog.close();
     });
 
+    loadSavedLegalLimits();
     render();
   </script>
 </body>
