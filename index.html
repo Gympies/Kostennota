@@ -36,21 +36,21 @@
 
       <div class="flex items-center gap-2 sm:gap-3">
         <button id="profileButton" type="button" class="flex items-center gap-2 rounded-xl px-2 py-1.5 transition hover:bg-slate-50" aria-haspopup="dialog">
-          <span id="avatarInitials" class="grid h-8 w-8 place-items-center rounded-full bg-amber-100 text-xs font-bold text-amber-900" aria-hidden="true">NW</span>
-          <span id="headerUserName" class="hidden text-sm font-medium text-slate-700 sm:inline">Noor Willems</span>
+          <span id="avatarInitials" class="grid h-8 w-8 place-items-center rounded-full bg-amber-100 text-xs font-bold text-amber-900" aria-hidden="true"></span>
+          <span id="headerUserName" class="hidden text-sm font-medium text-slate-700 sm:inline">Gegevens laden…</span>
           <span class="hidden text-xs text-slate-400 sm:inline">Profiel</span>
         </button>
         <span class="mx-1 hidden h-7 w-px bg-slate-200 sm:block" aria-hidden="true"></span>
         <div class="flex rounded-xl bg-slate-100 p-1" role="group" aria-label="Kies weergave">
           <button id="trainerTab" type="button" aria-pressed="true" class="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-teal-800 shadow-sm transition sm:text-sm">Trainer</button>
-          <button id="boardTab" type="button" aria-pressed="false" class="rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:text-slate-800 sm:text-sm">Bestuur</button>
+          <button id="boardTab" type="button" aria-pressed="false" style="display:none" class="rounded-lg px-3 py-2 text-xs font-semibold text-slate-500 transition hover:text-slate-800 sm:text-sm">Bestuur</button>
         </div>
       </div>
     </div>
     <div class="border-t border-slate-100 px-4 py-2 sm:hidden">
       <button id="mobileProfileButton" type="button" class="mx-auto flex w-full max-w-6xl items-center gap-2 text-left text-xs font-medium text-slate-600" aria-haspopup="dialog">
-        <span id="mobileAvatarInitials" class="grid h-6 w-6 place-items-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-900" aria-hidden="true">NW</span>
-        Ingelogd als <span id="mobileUserName">Noor Willems</span>
+        <span id="mobileAvatarInitials" class="grid h-6 w-6 place-items-center rounded-full bg-amber-100 text-[10px] font-bold text-amber-900" aria-hidden="true"></span>
+        Ingelogd als <span id="mobileUserName">Gegevens laden…</span>
         <span class="ml-auto text-teal-700">Profiel</span>
       </button>
     </div>
@@ -60,7 +60,7 @@
     <section id="trainerView" aria-labelledby="trainerHeading">
       <div class="mb-7">
         <p class="mb-2 text-sm font-semibold text-teal-700">Jouw overzicht</p>
-        <h1 id="trainerHeading" class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Hallo, Noor <span aria-hidden="true">👋</span></h1>
+        <h1 id="trainerHeading" class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Je overzicht</h1>
         <p class="mt-2 text-sm leading-6 text-slate-500 sm:text-base">Registreer je training en houd je uren eenvoudig bij.</p>
       </div>
       <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -424,26 +424,12 @@
     addGroupOptions(document.getElementById("editGroup"));
     addGroupOptions(document.getElementById("fixedGroup"));
 
-    let currentUser = "Noor Vandenberg";
-    let trainerProfiles = {
-      "Noor Vandenberg": { email: "noor.vandenberg@example.com", phone: "000 00 00 00", address: "Demo straat 1, 0000 Demo", birthDate: "2000-04-12", nationalNumber: "00.00.00-000.00", bankAccount: "BE00 0000 0000 0000", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 1, group: "K12za11u10", weekday: 6, hours: 1, role: "REC HOOFD" }], additionalProfiles: [{ name: "Emma De Smet", enabled: true }, { name: "Bram Jacobs", enabled: false }] },
-      "Lotte Peeters": { email: "lotte.peeters@example.com", phone: "", address: "Voorbeeldlaan 12, 0000 Testdorp", birthDate: "1998-07-23", nationalNumber: "00.00.00-000.01", bankAccount: "BE00 0000 0000 0001", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
-      "Milan Vermeulen": { email: "milan.vermeulen@example.com", phone: "", address: "Fictiestraat 3, 0000 Voorbeeld", birthDate: "2001-02-05", nationalNumber: "00.00.00-000.02", bankAccount: "BE00 0000 0000 0002", rateHelp: 8, rateHead: 14, fixedGroups: [], additionalProfiles: [] },
-      "Emma De Smet": { email: "emma.desmet@example.com", phone: "", address: "Demoweg 8, 0000 Testdorp", birthDate: "2005-06-30", nationalNumber: "00.00.00-000.03", bankAccount: "BE00 0000 0000 0003", rateHelp: 8, rateHead: 14, fixedGroups: [{ id: 101, group: "G-gym jeugd", weekday: 6, hours: 1, role: "REC HULP" }], owner: "Noor Vandenberg", isAdditional: true, enabled: true },
-      "Bram Jacobs": { email: "bram.jacobs@example.com", phone: "", address: "Fictielaan 5, 0000 Voorbeeld", birthDate: "", nationalNumber: "00.00.00-000.04", bankAccount: "BE00 0000 0000 0004", rateHelp: 8, rateHead: 14, fixedGroups: [], owner: "Noor Vandenberg", isAdditional: true, enabled: false }
-    };
+    let currentUser = "";
+    let isBestuur = false;
+    let trainerProfiles = {};
     const todayString = isoDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
-    let entries = [
-      { id: 1, trainer: currentUser, date: "2026-09-06", group: "K12za9u10", hours: 1, role: "REC HOOFD", status: "Concept" },
-      { id: 2, trainer: currentUser, date: "2026-09-12", group: "G-gym jeugd", hours: 1, role: "REC HOOFD", replacementFor: "Milan Vermeulen", status: "Concept" },
-      { id: 3, trainer: "Lotte Peeters", date: "2026-09-12", group: "M12za", hours: 1.5, role: "REC HOOFD", status: "Ingediend" },
-      { id: 4, trainer: "Milan Vermeulen", date: "2026-10-10", group: "J123zo", hours: 2, role: "COMP HOOFD", status: "Ingediend" },
-      { id: 5, trainer: currentUser, date: todayString, group: "K12za9u10", hours: 1, role: "REC HOOFD", status: "Concept" },
-      { id: 6, trainer: "Lotte Peeters", date: "2026-10-15", group: "G-gym jeugd", hours: 1, role: "REC HULP", status: "Ingediend" },
-      { id: 7, trainer: "Milan Vermeulen", date: "2026-09-12", group: "G-gym jeugd", hours: 1, role: "REC HOOFD", status: "Concept" },
-      { id: 8, trainer: "Emma De Smet", date: "2026-09-05", group: "G-gym jeugd", hours: 1, role: "REC HULP", status: "Concept" }
-    ];
-    let nextId = Math.max(...entries.map((entry) => entry.id)) + 1;
+    let entries = [];
+    let nextId = 1;
     let nextFixedGroupId = 2;
     let toastTimeout;
     const defaultLegalLimits = { daily: 42.31, annual: 3108.44 };
@@ -654,8 +640,9 @@
     }
 
     function rateForEntry(entry, trainerName) {
-      const profile = trainerProfiles[trainerName] || { rateHelp: 8, rateHead: 14 };
-      return entry.role.includes("HULP") ? Number(profile.rateHelp) : Number(profile.rateHead);
+      const profile = trainerProfiles[trainerName];
+      if (!profile || !profile.tarieven) return 0;
+      return Number(profile.tarieven[entry.role]) || 0;
     }
 
     function amountForEntry(entry) {
@@ -1570,14 +1557,19 @@
         showToast(`Toevoegen geblokkeerd: ${displayDate(newEntry.date)} komt op ${currency.format(newDayAmount)}, boven het dagmaximum van ${currency.format(dailyLimit)}.`);
         return;
       }
-      entries.push(newEntry);
-      event.currentTarget.reset();
-      document.getElementById("date").value = todayString;
-      const entryPeriod = periodForDate(newEntry.date);
-      trainerPeriodSelect.value = entryPeriod.key;
-      document.getElementById("trainerPerson").value = newEntry.trainer;
-      render();
-      showToast("Uren toegevoegd aan je overzicht.");
+      google.script.run
+        .withSuccessHandler(() => {
+          entries.push(newEntry);
+          event.target.reset();
+          document.getElementById("date").value = todayString;
+          const entryPeriod = periodForDate(newEntry.date);
+          trainerPeriodSelect.value = entryPeriod.key;
+          document.getElementById("trainerPerson").value = newEntry.trainer;
+          render();
+          showToast("Uren succesvol geregistreerd!");
+        })
+        .withFailureHandler((err) => showToast("Fout bij opslaan: " + err.message))
+        .saveNewEntry(newEntry);
     });
 
     trainerEntries.addEventListener("change", (event) => {
@@ -1747,8 +1739,28 @@
       if (event.target === editDialog) editDialog.close();
     });
 
+    function initApp(serverData) {
+      currentUser = serverData.currentUserNaam;
+      isBestuur = serverData.isBestuur;
+      trainerProfiles = serverData.profiles;
+      entries = serverData.entries;
+      nextId = entries.length > 0 ? Math.max(...entries.map((entry) => entry.id)) + 1 : 1;
+      const fixedGroupIds = Object.values(trainerProfiles)
+        .flatMap((profile) => profile.fixedGroups || [])
+        .map((schedule) => Number(schedule.id))
+        .filter(Number.isFinite);
+      nextFixedGroupId = fixedGroupIds.length ? Math.max(...fixedGroupIds) + 1 : 1;
+      document.getElementById("boardTab").style.display = isBestuur ? "block" : "none";
+      render();
+    }
+
     loadSavedLegalLimits();
-    render();
+    document.addEventListener("DOMContentLoaded", () => {
+      google.script.run
+        .withSuccessHandler(initApp)
+        .withFailureHandler((err) => showToast("Fout bij ophalen gegevens: " + err.message))
+        .getInitialData();
+    });
   </script>
 </body>
 </html>
